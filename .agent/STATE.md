@@ -6,7 +6,7 @@ Checkpoint file. Update after every meaningful step. Latest entry first.
 
 - **Phase:** P00 — Bootstrap
 - **Status:** DONE
-- **Updated:** 2026-11-18
+- **Updated:** 2026-11-19
 
 ## Environment
 
@@ -49,6 +49,9 @@ Preflight passed.
 ```
 
 Exit code: **0**
+
+Repo: **https://github.com/hacegan/rota**
+P00 commit: **3fef683** — `chore: bootstrap rules, roadmap, preflight [P00]` (branch `main`, pushed to `origin`)
 
 ### Fixes applied to `scripts/preflight.ps1` (only file changed besides this checkpoint)
 
