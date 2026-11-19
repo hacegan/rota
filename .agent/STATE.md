@@ -4,7 +4,7 @@ Checkpoint file. Update after every meaningful step. Latest entry first.
 
 ## Current
 
-- **Phase:** P00 — Bootstrap
+- **Phase:** P01 — Domain & requirements
 - **Status:** DONE
 - **Updated:** 2026-11-19
 
@@ -67,11 +67,45 @@ P00 commit: **3fef683** — `chore: bootstrap rules, roadmap, preflight [P00]` (
 Earlier hung processes (verified by command line, then terminated with ONAY): `pwsh.exe` 33044,
 `python.exe` 30032, wrapper `pwsh.exe` 34552.
 
+## P01 evidence
+
+Deliverables: `docs/domain/GLOSSARY.md`, `docs/domain/REQUIREMENTS.md`, and
+`fixtures/mini/` (`employees.json`, `shifts.csv`, `availability.json` — synthetic data only,
+no real names or personal data).
+
+Verifier: `scripts/verify_p01.ps1` (P01-only). The roadmap's original P01 verify called
+`scripts/verify.ps1`, which is a P02 deliverable; per instruction it was not created, and the
+P01 verify line was updated to `pwsh -NoProfile -File scripts/verify_p01.ps1`.
+
+Command run (exact):
+
+```powershell
+pwsh -NoProfile -File scripts/verify_p01.ps1
+```
+
+Exact full output:
+
+```text
+Rota P01 verify
+Repository: C:\dev\rota
+
+OK    glossary           all 8 terms present
+OK    requirements       2355 bytes
+OK    fixtures           3 files
+OK    json-parse         2 JSON files parsed
+
+P01 verify: 4 OK, 0 WARN, 0 FAIL
+P01 verify passed.
+```
+
+Exit code: **0**
+
 ## Verify log
 
 | Phase | Command | Result | Date |
 | --- | --- | --- | --- |
 | P00 | `pwsh -File scripts/preflight.ps1` | DONE — exit code 0, 11 OK / 4 WARN / 0 FAIL | 2026-11-18 |
+| P01 | `pwsh -NoProfile -File scripts/verify_p01.ps1` | DONE — exit code 0, 4 OK / 0 WARN / 0 FAIL | 2026-11-19 |
 
 ## Files changed
 
@@ -79,10 +113,17 @@ Earlier hung processes (verified by command line, then terminated with ONAY): `p
 - `.agent/STATE.md`
 - `docs/plan/ROADMAP.md`
 - `scripts/preflight.ps1`
+- `docs/domain/GLOSSARY.md`
+- `docs/domain/REQUIREMENTS.md`
+- `fixtures/mini/employees.json`
+- `fixtures/mini/shifts.csv`
+- `fixtures/mini/availability.json`
+- `scripts/verify_p01.ps1`
 - `.gitignore`
 - `.gitattributes`
 - `LICENSE`
 
 ## Next action
 
-- P00 is DONE. P01 has not been started, per instruction. Await direction before starting P01.
+- P01 is DONE (verify exit code 0). P02 not started, per instruction. Await direction before
+  starting P02.

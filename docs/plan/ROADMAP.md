@@ -77,7 +77,7 @@ Expected: exit code 0, all required checks OK.
 **Verify**
 
 ```powershell
-pwsh -File scripts/verify.ps1 p01
+pwsh -NoProfile -File scripts/verify_p01.ps1
 ```
 
 Expected: fixtures parse with a tiny loader; glossary terms all used in requirements.
