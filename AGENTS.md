@@ -41,3 +41,11 @@ Rules for AI agents working in this repository (project **Rota**, a shift schedu
   build tool unless a roadmap phase calls for it.
 - Comments only where something is non-obvious.
 - Keep commits small and scoped to one phase.
+
+## Two-machine rule
+
+- The **company machine** may write code/docs and push, but must not mark a phase DONE.
+- The **local machine** runs the phase verify and is the only machine that marks DONE.
+- Always `git pull --rebase origin main` before starting work.
+- No force push. Stop on merge conflict.
+

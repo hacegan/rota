@@ -4,8 +4,8 @@ Checkpoint file. Update after every meaningful step. Latest entry first.
 
 ## Current
 
-- **Phase:** P01 — Domain & requirements
-- **Status:** DONE
+- **Phase:** P02 — Stack & skeleton
+- **Status:** in_progress
 - **Updated:** 2026-11-19
 
 ## Environment
@@ -100,12 +100,69 @@ P01 verify passed.
 
 Exit code: **0**
 
+## P02 prep evidence
+
+Two-machine rule appended to `AGENTS.md`.
+
+`scripts/verify.ps1` dispatcher created; dispatches `p01` to `scripts/verify_p01.ps1`.
+Unknown or unimplemented phases exit 2 with a clear message.
+
+Command run (exact):
+
+```powershell
+pwsh -NoProfile -File scripts/verify.ps1 p01
+```
+
+Exact full output:
+
+```text
+Rota P01 verify
+Repository: C:\dev\rota
+
+OK    glossary           all 8 terms present
+OK    requirements       2355 bytes
+OK    fixtures           3 files
+OK    json-parse         2 JSON files parsed
+
+P01 verify: 4 OK, 0 WARN, 0 FAIL
+P01 verify passed.
+```
+
+Exit code: **0**
+
+Unknown-phase check: `pwsh -NoProfile -File scripts/verify.ps1 p99` printed
+`Unknown or unimplemented phase: p99` / `Supported phases: p01` and exited **2**.
+
+## P02 step evidence
+
+First open P02 step: `docs/plan/STACK.md` created — Node.js v26.13.1 / npm 11.20.0, plain ES
+modules, zero external runtime deps (`node:sqlite`, `node:test`, `node:http` built in).
+
+P02 verify boundary (real output; `scripts/build.ps1` and `scripts/test.ps1` are later P02
+deliverables and do not exist yet):
+
+```powershell
+pwsh -NoProfile -File scripts/build.ps1
+pwsh -NoProfile -File scripts/test.ps1
+```
+
+```text
+The argument 'scripts/build.ps1' is not recognized as the name of a script file. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+BUILD_EXITCODE=64
+The argument 'scripts/test.ps1' is not recognized as the name of a script file. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+TEST_EXITCODE=64
+```
+
+(pwsh also printed its usage help after each error.) Both exit **64** — script files missing.
+Stopped at the verify boundary; P03 not started.
+
 ## Verify log
 
 | Phase | Command | Result | Date |
 | --- | --- | --- | --- |
 | P00 | `pwsh -File scripts/preflight.ps1` | DONE — exit code 0, 11 OK / 4 WARN / 0 FAIL | 2026-11-18 |
 | P01 | `pwsh -NoProfile -File scripts/verify_p01.ps1` | DONE — exit code 0, 4 OK / 0 WARN / 0 FAIL | 2026-11-19 |
+| P02 | `pwsh -File scripts/build.ps1` / `pwsh -File scripts/test.ps1` | in_progress — exit 64, both scripts missing | 2026-11-19 |
 
 ## Files changed
 
@@ -119,11 +176,14 @@ Exit code: **0**
 - `fixtures/mini/shifts.csv`
 - `fixtures/mini/availability.json`
 - `scripts/verify_p01.ps1`
+- `scripts/verify.ps1`
+- `docs/plan/STACK.md`
 - `.gitignore`
 - `.gitattributes`
 - `LICENSE`
 
 ## Next action
 
-- P01 is DONE (verify exit code 0). P02 not started, per instruction. Await direction before
-  starting P02.
+- P02 in progress. First step done (`docs/plan/STACK.md`). Remaining P02 deliverables: project
+  files / solution layout, `scripts/build.ps1`, `scripts/test.ps1`. The P02 verify boundary is
+  not reachable until those exist. P03 not started.
