@@ -204,6 +204,6 @@ Temurin 27 and re-run preflight before building. See `.agent/QUESTIONS.md` (Q1 a
 
 ## Next action
 
-- P02 stack binding done except Java. Awaiting Samet's answer to `.agent/QUESTIONS.md` (which
-  Java version to bind) before committing. Then remaining P02 deliverables: project files /
-  solution layout, `scripts/build.ps1`, `scripts/test.ps1`. P03 not started.
+- P02 stack binding committed and pushed: `5d85979` — `fix: bind stack to Java, add machine-role
+  rule [P02]`. Remaining P02 deliverables: project files / solution layout, `scripts/build.ps1`,
+  `scripts/test.ps1`. Provision Temurin 27 and re-run preflight before building. P03 not started.
