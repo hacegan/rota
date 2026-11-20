@@ -248,6 +248,57 @@ Preflight passed.
 
 Exit code: **0**
 
+## P01/P02 verify (2026-11-20)
+
+### P01
+
+Command: `pwsh -NoProfile -File scripts/verify.ps1 p01` — exit code **0**
+
+```text
+Rota P01 verify
+Repository: C:\dev\rota
+
+OK    glossary           all 8 terms present
+OK    requirements       3166 bytes
+OK    fixtures           5 files
+OK    json-parse         4 JSON files parsed
+
+P01 verify: 4 OK, 0 WARN, 0 FAIL
+P01 verify passed.
+```
+
+### P02
+
+Command: `pwsh -NoProfile -File scripts/verify.ps1 p02` — exit code **0**
+
+```text
+JAVA_HOME: C:\Users\samet\AppData\Local\Programs\Eclipse Adoptium\jdk-27.0.1.0-hotspot
+openjdk version "27.0.1.0.2" 2026-10-21
+OpenJDK Runtime Environment Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1)
+OpenJDK 64-Bit Server VM Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1, mixed mode, sharing)
+Rota P02 verify
+Repository: C:\dev\rota
+
+OK    layout             aggregator + domain, application, bootstrap
+JAVA_HOME: C:\Users\samet\AppData\Local\Programs\Eclipse Adoptium\jdk-27.0.1.0-hotspot
+openjdk version "27.0.1.0.2" 2026-10-21
+OpenJDK Runtime Environment Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1)
+OpenJDK 64-Bit Server VM Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1, mixed mode, sharing)
+OK    build              mvnw -q -DskipTests package
+JAVA_HOME: C:\Users\samet\AppData\Local\Programs\Eclipse Adoptium\jdk-27.0.1.0-hotspot
+openjdk version "27.0.1.0.2" 2026-10-21
+OpenJDK Runtime Environment Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1)
+OpenJDK 64-Bit Server VM Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1, mixed mode, sharing)
+SLF4J(W): No SLF4J providers were found.
+SLF4J(W): Defaulting to no-operation (NOP) logger implementation
+SLF4J(W): See https://www.slf4j.org/codes.html#noProviders for further details.
+OK    test               mvnw -q test
+OK    archunit           domain does not depend on Spring
+
+P02 verify: 4 OK, 0 WARN, 0 FAIL
+P02 verify passed.
+```
+
 ## Verify log
 
 | Phase | Command | Result | Date |
@@ -268,11 +319,19 @@ Exit code: **0**
 - `fixtures/mini/employees.json`
 - `fixtures/mini/shifts.csv`
 - `fixtures/mini/availability.json`
+- `fixtures/mini/preferences.json`
+- `fixtures/mini/previous-roster.json`
+- `fixtures/tight/availability.json`
+- `fixtures/tight/employees.json`
+- `fixtures/tight/shifts.csv`
 - `scripts/verify_p01.ps1`
 - `scripts/verify.ps1`
 - `scripts/verify_p02.ps1`
 - `docs/plan/STACK.md`
 - `VERSIONS.md`
+- `docs/design/DECISIONS.md`
+- `docs/adr/0001-coverage-as-medium.md`
+- `docs/design/TIMEFOLD-VERIFIED.md`
 - `.mvn/wrapper/maven-wrapper.properties`
 - `mvnw`
 - `mvnw.cmd`
@@ -292,4 +351,4 @@ Exit code: **0**
 
 ## Next action
 
-- P02 DONE (verify exit code 0). P03 not started; awaiting direction.
+- P01 and P02 both DONE (verify exit code 0). P03 not started; awaiting direction.

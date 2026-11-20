@@ -26,7 +26,14 @@ live in `VERSIONS.md`. Changing the stack requires an ADR and Samet's explicit a
 - Mockito — mocking collaborators in tests.
 - ArchUnit — enforce architecture rules as tests.
 
-## Later phases
+## Modules
+
+- `domain` — pure Java, zero framework deps.
+- `application` — use cases; depends on `domain`.
+- `solver` — Timefold-backed constraint solving; depends on `domain`, never the reverse;
+  Timefold never enters domain. ArchUnit rule: `dev.rota.domain` must not depend on
+  `ai.timefold..`.
+- `bootstrap` — Spring Boot app.
 
 - Next.js/React/TypeScript — frontend only (schedule board); never the backend runtime.
 - Docker Compose — run the full local stack for development.

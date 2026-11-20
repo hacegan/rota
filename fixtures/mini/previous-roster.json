@@ -1,0 +1,10 @@
+{
+  "timezone": "Europe/Istanbul",
+  "previous_roster": {
+    "period": "2026-11-16/2026-11-22",
+    "assignments": [
+      { "shift_id": "S02", "employee_id": "E2", "pinned": false },
+      { "shift_id": "S04", "employee_id": "E2", "pinned": true }
+    ]
+  }
+}
