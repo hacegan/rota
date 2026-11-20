@@ -11,6 +11,9 @@ GA versions are selected (exclude `-M*`, `-RC*`, `-beta*`, `-alpha*`, `-rc*`).
 | `ai.timefold.solver:timefold-solver-core` | 2.8.0 | https://repo1.maven.org/maven2/ai/timefold/solver/timefold-solver-core/maven-metadata.xml |
 | `org.testcontainers:testcontainers` | 2.0.5 | https://repo1.maven.org/maven2/org/testcontainers/testcontainers/maven-metadata.xml |
 | `org.junit.jupiter:junit-jupiter` | 6.1.3 | https://repo1.maven.org/maven2/org/junit/jupiter/junit-jupiter/maven-metadata.xml |
+| `org.apache.maven.wrapper:maven-wrapper-distribution` | 3.3.4 | https://repo1.maven.org/maven2/org/apache/maven/wrapper/maven-wrapper-distribution/maven-metadata.xml |
+| `org.apache.maven:apache-maven` | 3.10.1 | https://repo1.maven.org/maven2/org/apache/maven/apache-maven/maven-metadata.xml |
+| `com.tngtech.archunit:archunit` | 1.5.1 | https://repo1.maven.org/maven2/com/tngtech/archunit/archunit/maven-metadata.xml |
 
 ## Evidence
 
@@ -100,6 +103,72 @@ Output (relevant lines):
 ```
 
 Latest GA is `6.1.3`.
+
+### Maven Wrapper — 3.3.4
+
+Command:
+
+```powershell
+(Invoke-WebRequest -Uri 'https://repo1.maven.org/maven2/org/apache/maven/wrapper/maven-wrapper-distribution/maven-metadata.xml' -UseBasicParsing).Content
+```
+
+Output (relevant lines):
+
+```xml
+<latest>3.3.4</latest>
+<release>3.3.4</release>
+...
+<version>3.3.3</version>
+<version>3.3.4</version>
+```
+
+Latest GA is `3.3.4`. The `only-script` distribution zip was extracted and its `mvnw` /
+`mvnw.cmd` committed; `.mvn/wrapper/maven-wrapper.properties` points at `apache-maven 3.10.1`.
+
+### Apache Maven — 3.10.1
+
+Command:
+
+```powershell
+(Invoke-WebRequest -Uri 'https://repo1.maven.org/maven2/org/apache/maven/apache-maven/maven-metadata.xml' -UseBasicParsing).Content
+```
+
+Output (relevant lines):
+
+```xml
+<latest>4.0.0-rc-7</latest>
+<release>4.0.0-rc-7</release>
+...
+<version>3.9.15</version>
+<version>3.9.16</version>
+<version>3.10.0-rc-1</version>
+<version>3.10.0</version>
+<version>3.10.1</version>
+<version>4.0.0-alpha-2</version>
+```
+
+`4.0.0` exists only as alpha/beta/rc, so the latest GA is `3.10.1`. Used as the
+`distributionUrl` in `.mvn/wrapper/maven-wrapper.properties`.
+
+### ArchUnit — 1.5.1
+
+Command:
+
+```powershell
+(Invoke-WebRequest -Uri 'https://repo1.maven.org/maven2/com/tngtech/archunit/archunit/maven-metadata.xml' -UseBasicParsing).Content
+```
+
+Output (relevant lines):
+
+```xml
+<latest>1.5.1</latest>
+<release>1.5.1</release>
+...
+<version>1.5.0</version>
+<version>1.5.1</version>
+```
+
+Latest GA is `1.5.1`.
 
 ## Java — Temurin 27.0.1 (installed)
 

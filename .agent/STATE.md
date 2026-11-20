@@ -5,7 +5,7 @@ Checkpoint file. Update after every meaningful step. Latest entry first.
 ## Current
 
 - **Phase:** P02 — Stack & skeleton
-- **Status:** in_progress
+- **Status:** DONE
 - **Updated:** 2026-11-20
 
 ## Environment
@@ -135,26 +135,54 @@ Unknown-phase check: `pwsh -NoProfile -File scripts/verify.ps1 p99` printed
 
 ## P02 step evidence
 
-First open P02 step: `docs/plan/STACK.md` created — Node.js v26.13.1 / npm 11.20.0, plain ES
-modules, zero external runtime deps (`node:sqlite`, `node:test`, `node:http` built in).
+First open P02 step: `docs/plan/STACK.md` created — Java 27 (Temurin), Maven wrapper,
+Spring Boot, Spring Web, Spring Data JPA/Hibernate, Bean Validation, Flyway, PostgreSQL,
+Timefold Solver, Kafka, RabbitMQ, Redis, MongoDB, Elasticsearch, Spring AI, gRPC,
+Testcontainers, JUnit, Mockito, ArchUnit; Next.js/React/TypeScript is frontend-only.
 
-P02 verify boundary (real output; `scripts/build.ps1` and `scripts/test.ps1` are later P02
-deliverables and do not exist yet):
+Earlier verify boundary (before the Maven skeleton existed):
+`pwsh -NoProfile -File scripts/build.ps1` and `scripts/test.ps1` exited **64** (files missing).
+That boundary is now cleared; see "P02 verify evidence".
+
+## P02 verify evidence
+
+Command run (exact):
 
 ```powershell
-pwsh -NoProfile -File scripts/build.ps1
-pwsh -NoProfile -File scripts/test.ps1
+pwsh -NoProfile -File scripts/verify.ps1 p02
 ```
+
+Exact full output:
 
 ```text
-The argument 'scripts/build.ps1' is not recognized as the name of a script file. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
-BUILD_EXITCODE=64
-The argument 'scripts/test.ps1' is not recognized as the name of a script file. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
-TEST_EXITCODE=64
+JAVA_HOME: C:\Users\samet\AppData\Local\Programs\Eclipse Adoptium\jdk-27.0.1.0-hotspot
+openjdk version "27.0.1.0.2" 2026-10-21
+OpenJDK Runtime Environment Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1)
+OpenJDK 64-Bit Server VM Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1, mixed mode, sharing)
+Rota P02 verify
+Repository: C:\dev\rota
+
+OK    layout             aggregator + domain, application, bootstrap
+JAVA_HOME: C:\Users\samet\AppData\Local\Programs\Eclipse Adoptium\jdk-27.0.1.0-hotspot
+openjdk version "27.0.1.0.2" 2026-10-21
+OpenJDK Runtime Environment Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1)
+OpenJDK 64-Bit Server VM Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1, mixed mode, sharing)
+OK    build              mvnw -q -DskipTests package
+JAVA_HOME: C:\Users\samet\AppData\Local\Programs\Eclipse Adoptium\jdk-27.0.1.0-hotspot
+openjdk version "27.0.1.0.2" 2026-10-21
+OpenJDK Runtime Environment Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1)
+OpenJDK 64-Bit Server VM Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1, mixed mode, sharing)
+SLF4J(W): No SLF4J providers were found.
+SLF4J(W): Defaulting to no-operation (NOP) logger implementation
+SLF4J(W): See https://www.slf4j.org/codes.html#noProviders for further details.
+OK    test               mvnw -q test
+OK    archunit           domain does not depend on Spring
+
+P02 verify: 4 OK, 0 WARN, 0 FAIL
+P02 verify passed.
 ```
 
-(pwsh also printed its usage help after each error.) Both exit **64** — script files missing.
-Stopped at the verify boundary; P03 not started.
+Exit code: **0**
 
 ## P02 stack evidence
 
@@ -226,7 +254,7 @@ Exit code: **0**
 | --- | --- | --- | --- |
 | P00 | `pwsh -File scripts/preflight.ps1` | DONE — exit code 0, 11 OK / 4 WARN / 0 FAIL | 2026-11-18 |
 | P01 | `pwsh -NoProfile -File scripts/verify_p01.ps1` | DONE — exit code 0, 4 OK / 0 WARN / 0 FAIL | 2026-11-19 |
-| P02 | `pwsh -File scripts/build.ps1` / `pwsh -File scripts/test.ps1` | in_progress — exit 64, both scripts missing | 2026-11-19 |
+| P02 | `pwsh -NoProfile -File scripts/verify.ps1 p02` | DONE — exit code 0, 4 OK / 0 WARN / 0 FAIL | 2026-11-20 |
 
 ## Files changed
 
@@ -242,14 +270,26 @@ Exit code: **0**
 - `fixtures/mini/availability.json`
 - `scripts/verify_p01.ps1`
 - `scripts/verify.ps1`
+- `scripts/verify_p02.ps1`
 - `docs/plan/STACK.md`
 - `VERSIONS.md`
+- `.mvn/wrapper/maven-wrapper.properties`
+- `mvnw`
+- `mvnw.cmd`
+- `pom.xml`
+- `domain/pom.xml`
+- `domain/src/main/java/dev/rota/domain/Employee.java`
+- `domain/src/test/java/dev/rota/domain/EmployeeTest.java`
+- `domain/src/test/java/dev/rota/domain/ArchitectureTest.java`
+- `application/pom.xml`
+- `bootstrap/pom.xml`
+- `bootstrap/src/main/java/dev/rota/bootstrap/RotaApplication.java`
+- `scripts/build.ps1`
+- `scripts/test.ps1`
 - `.gitignore`
 - `.gitattributes`
 - `LICENSE`
 
 ## Next action
 
-- P02 env pinning done: `scripts/env.ps1` + preflight dot-source and Java 27 gate; preflight
-  passes (exit 0). Remaining P02 deliverables: project files / solution layout,
-  `scripts/build.ps1`, `scripts/test.ps1`. P03 not started.
+- P02 DONE (verify exit code 0). P03 not started; awaiting direction.

@@ -58,9 +58,9 @@ if (-not $javaHome -or -not (Test-Path (Join-Path $javaHome 'bin\java.exe') -Pat
 
 $env:JAVA_HOME = $javaHome
 $bin = Join-Path $javaHome 'bin'
-if (($env:Path -split ';') -notcontains $bin) {
-    $env:Path = "$bin;$env:Path"
-}
+# Ensure the JDK 27 bin is first even if an older JDK already wins on PATH.
+$entries = $env:Path -split ';' | Where-Object { $_ -and ($_.TrimEnd('\') -ine $bin.TrimEnd('\')) }
+$env:Path = (@($bin) + $entries) -join ';'
 
 Write-Host ("JAVA_HOME: {0}" -f $env:JAVA_HOME)
 & java -version 2>&1 | ForEach-Object { Write-Host $_ }
