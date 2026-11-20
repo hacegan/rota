@@ -30,6 +30,9 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
+# Resolve the machine JDK 27 for this session (no admin, no system changes).
+. (Join-Path $PSScriptRoot 'env.ps1')
+
 $script:Results = [System.Collections.Generic.List[object]]::new()
 
 function Add-Result {
@@ -41,6 +44,13 @@ function Add-Result {
     $script:Results.Add([pscustomobject]@{ Name = $Name; Status = $Status; Detail = $Detail })
     $color = @{ OK = 'Green'; WARN = 'Yellow'; FAIL = 'Red' }[$Status]
     Write-Host ("{0,-4}  {1,-18} {2}" -f $Status, $Name, $Detail) -ForegroundColor $color
+}
+
+function Get-MajorVersion {
+    param([string]$Detail)
+    $match = [regex]::Match($Detail, '"(\d+)(?:\.[0-9]+)*"')
+    if ($match.Success) { return [int]$match.Groups[1].Value }
+    return $null
 }
 
 function Get-ToolVersion {
@@ -102,6 +112,9 @@ $versionArgs = @{
 $optionalTools = @('dotnet', 'python', 'kubectl', 'helm', 'kind')
 $allTools = @($Require) + @($optionalTools | Where-Object { $_ -notin $Require })
 
+# Tools whose resolved major version must match exactly.
+$versionGates = @{ java = 27 }
+
 foreach ($tool in ($allTools | Select-Object -Unique)) {
     $probe = Get-ToolVersion -Name $tool
     if ($null -eq $probe) {
@@ -109,7 +122,19 @@ foreach ($tool in ($allTools | Select-Object -Unique)) {
         Add-Result -Name $tool -Status $status -Detail 'not found'
     }
     elseif ($probe.Ok) {
-        Add-Result -Name $tool -Status OK -Detail $probe.Detail
+        $requiredMajor = $versionGates[$tool]
+        if ($null -ne $requiredMajor) {
+            $major = Get-MajorVersion -Detail $probe.Detail
+            if ($major -eq $requiredMajor) {
+                Add-Result -Name $tool -Status OK -Detail $probe.Detail
+            }
+            else {
+                Add-Result -Name $tool -Status FAIL -Detail "$($probe.Detail) (required major $requiredMajor)"
+            }
+        }
+        else {
+            Add-Result -Name $tool -Status OK -Detail $probe.Detail
+        }
     }
     else {
         $status = if ($tool -in $Require) { 'FAIL' } else { 'WARN' }

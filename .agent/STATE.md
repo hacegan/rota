@@ -171,9 +171,54 @@ lines to fix.
 - Testcontainers `org.testcontainers:testcontainers` — **2.0.5**
 - JUnit `org.junit.jupiter:junit-jupiter` — **6.1.3**
 
-Java: Samet confirmed binding **Java 27 (Temurin)** on 2026-11-20. It is not installed on this
-machine yet — preflight reports OpenLogic 21.0.10 and `.jdks` has MS OpenJDK 25. Provision
-Temurin 27 and re-run preflight before building. See `.agent/QUESTIONS.md` (Q1 answered).
+Java: Samet confirmed binding **Java 27 (Temurin)** on 2026-11-20. Now resolved per-user at
+`C:\Users\samet\AppData\Local\Programs\Eclipse Adoptium\jdk-27.0.1.0-hotspot` via
+`scripts/env.ps1` (see P02 env evidence).
+
+## P02 env evidence
+
+`scripts/env.ps1` created: reads `java_home` from `.agent/MACHINE.md`, else scans the
+per-user/machine Adoptium dirs for `jdk-27*`, records the highest, and sets `JAVA_HOME` plus
+the session `PATH` (no admin, no system changes). `scripts/preflight.ps1` dot-sources it and
+gates `java` on resolved major version 27.
+
+Command run (exact):
+
+```powershell
+pwsh -NoProfile -File scripts/preflight.ps1
+```
+
+Exact full output:
+
+```text
+JAVA_HOME: C:\Users\samet\AppData\Local\Programs\Eclipse Adoptium\jdk-27.0.1.0-hotspot
+openjdk version "27.0.1.0.2" 2026-10-21
+OpenJDK Runtime Environment Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1)
+OpenJDK 64-Bit Server VM Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1, mixed mode, sharing)
+Rota preflight
+Repository: C:\dev\rota
+
+OK    pwsh               PowerShell 7.7.0
+OK    git                git version 2.56.0.windows.4
+OK    java               openjdk version "27.0.1.0.2" 2026-10-21
+OK    node               v26.13.1
+OK    npm                11.20.0
+OK    docker             Docker version 29.9.3, build 5457199
+OK    gh                 gh version 2.105.0 (2026-11-17)
+OK    opencode           opencode v2.2.7
+WARN  dotnet             version probe exited with code -2147450725
+OK    python             Python 3.13.17
+WARN  kubectl            version probe exited with code 1
+WARN  helm               not found
+WARN  kind               not found
+OK    ram                19681 MB free / 32406 MB total
+OK    disk               143,55 GB free on C:\
+
+Preflight: 11 OK, 4 WARN, 0 FAIL
+Preflight passed.
+```
+
+Exit code: **0**
 
 ## Verify log
 
@@ -189,6 +234,7 @@ Temurin 27 and re-run preflight before building. See `.agent/QUESTIONS.md` (Q1 a
 - `.agent/STATE.md`
 - `docs/plan/ROADMAP.md`
 - `scripts/preflight.ps1`
+- `scripts/env.ps1`
 - `docs/domain/GLOSSARY.md`
 - `docs/domain/REQUIREMENTS.md`
 - `fixtures/mini/employees.json`
@@ -204,6 +250,6 @@ Temurin 27 and re-run preflight before building. See `.agent/QUESTIONS.md` (Q1 a
 
 ## Next action
 
-- P02 stack binding committed and pushed: `5d85979` — `fix: bind stack to Java, add machine-role
-  rule [P02]`. Remaining P02 deliverables: project files / solution layout, `scripts/build.ps1`,
-  `scripts/test.ps1`. Provision Temurin 27 and re-run preflight before building. P03 not started.
+- P02 env pinning done: `scripts/env.ps1` + preflight dot-source and Java 27 gate; preflight
+  passes (exit 0). Remaining P02 deliverables: project files / solution layout,
+  `scripts/build.ps1`, `scripts/test.ps1`. P03 not started.

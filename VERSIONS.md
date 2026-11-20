@@ -101,16 +101,15 @@ Output (relevant lines):
 
 Latest GA is `6.1.3`.
 
-## Java — 27 (Temurin), target (not yet installed)
+## Java — Temurin 27.0.1 (installed)
 
-Samet confirmed binding **Java 27 (Temurin)** on 2026-11-20. It is not installed on this
-machine yet:
+Resolved per-user install: `C:\Users\samet\AppData\Local\Programs\Eclipse Adoptium\jdk-27.0.1.0-hotspot`
+(recorded in `.agent/MACHINE.md`, gitignored; `scripts/env.ps1` puts it on the session PATH).
 
-- Preflight output recorded in `.agent/STATE.md`: `openjdk version "21.0.10" 2026-01-20`
-  (OpenLogic OpenJDK, `C:\Program Files\OpenLogic\jdk-21.0.10.7-hotspot`).
-- `java -version` and `JAVA_HOME`: OpenLogic 21.0.10.
-- `C:\Users\samet\.jdks`: `ms-25.0.2`, `ms-25.0.3`, `openjdk-25`, `openjdk-25.0.2`
-  (Microsoft Build of OpenJDK 25).
-- No Temurin 27 install found on this machine.
+Evidence — `java -version` via `scripts/env.ps1`:
 
-Provision Temurin 27, then re-run `scripts/preflight.ps1` to confirm before building.
+```text
+openjdk version "27.0.1.0.2" 2026-10-21
+OpenJDK Runtime Environment Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1)
+OpenJDK 64-Bit Server VM Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1, mixed mode, sharing)
+```

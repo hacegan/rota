@@ -52,3 +52,8 @@ File missing -> STOP and ask Samet. Never infer the machine from the tool you ru
 
 `docs/plan/STACK.md` is binding. Changing the stack requires an ADR and Samet's explicit approval.
 
+## Machine environment
+
+Never hardcode absolute machine paths in tracked files. Machine-specific values live in
+`.agent/MACHINE.md` (gitignored). All build/test scripts must dot-source `scripts/env.ps1`.
+
