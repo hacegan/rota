@@ -32,3 +32,5 @@ TestResults/
 # Agent scratch (keep .agent/STATE.md tracked)
 .agent/*
 !.agent/STATE.md
+
+.agent/MACHINE.md

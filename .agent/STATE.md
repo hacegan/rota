@@ -6,7 +6,7 @@ Checkpoint file. Update after every meaningful step. Latest entry first.
 
 - **Phase:** P02 — Stack & skeleton
 - **Status:** in_progress
-- **Updated:** 2026-11-19
+- **Updated:** 2026-11-20
 
 ## Environment
 
@@ -156,6 +156,25 @@ TEST_EXITCODE=64
 (pwsh also printed its usage help after each error.) Both exit **64** — script files missing.
 Stopped at the verify boundary; P03 not started.
 
+## P02 stack evidence
+
+`docs/plan/STACK.md` rewritten: Java backend (Java 27 Temurin, Maven wrapper, Spring Boot,
+Spring Web, Spring Data JPA/Hibernate, Bean Validation, Flyway, PostgreSQL, Timefold Solver,
+Kafka, RabbitMQ, Redis, MongoDB, Elasticsearch, Spring AI, gRPC, Testcontainers, JUnit,
+Mockito, ArchUnit); Next.js/React/TypeScript is frontend-only. `ROADMAP.md` had no Node-backend
+lines to fix.
+
+`VERSIONS.md` resolved from Maven Central (GA only) on 2026-11-19:
+
+- Spring Boot `org.springframework.boot:spring-boot-starter-parent` — **4.1.2**
+- Timefold `ai.timefold.solver:timefold-solver-core` — **2.8.0**
+- Testcontainers `org.testcontainers:testcontainers` — **2.0.5**
+- JUnit `org.junit.jupiter:junit-jupiter` — **6.1.3**
+
+Java: Samet confirmed binding **Java 27 (Temurin)** on 2026-11-20. It is not installed on this
+machine yet — preflight reports OpenLogic 21.0.10 and `.jdks` has MS OpenJDK 25. Provision
+Temurin 27 and re-run preflight before building. See `.agent/QUESTIONS.md` (Q1 answered).
+
 ## Verify log
 
 | Phase | Command | Result | Date |
@@ -178,12 +197,13 @@ Stopped at the verify boundary; P03 not started.
 - `scripts/verify_p01.ps1`
 - `scripts/verify.ps1`
 - `docs/plan/STACK.md`
+- `VERSIONS.md`
 - `.gitignore`
 - `.gitattributes`
 - `LICENSE`
 
 ## Next action
 
-- P02 in progress. First step done (`docs/plan/STACK.md`). Remaining P02 deliverables: project
-  files / solution layout, `scripts/build.ps1`, `scripts/test.ps1`. The P02 verify boundary is
-  not reachable until those exist. P03 not started.
+- P02 stack binding done except Java. Awaiting Samet's answer to `.agent/QUESTIONS.md` (which
+  Java version to bind) before committing. Then remaining P02 deliverables: project files /
+  solution layout, `scripts/build.ps1`, `scripts/test.ps1`. P03 not started.
