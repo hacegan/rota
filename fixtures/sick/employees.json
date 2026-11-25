@@ -1,0 +1,8 @@
+{
+  "timezone": "Europe/Istanbul",
+  "employees": [
+    { "id": "E1", "name": "Riley Quinn", "skills": ["barista", "cashier"], "max_hours_per_week": 40, "contract_hours_per_week": 40 },
+    { "id": "E2", "name": "Morgan Blake", "skills": ["cashier"], "max_hours_per_week": 30, "contract_hours_per_week": 30 },
+    { "id": "E3", "name": "Jordan Lee", "skills": ["barista", "cashier"], "max_hours_per_week": 24, "contract_hours_per_week": 24 }
+  ]
+}

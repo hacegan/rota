@@ -4,10 +4,33 @@ Checkpoint file. Update after every meaningful step. Latest entry first.
 
 ## Current
 
-- **Phase:** P04 - Soft constraints and fairness (S1-S4)
-- **Status:** DONE
+- **Phase:** P05 - Incremental sick-call repair
+- **Status:** CODE_WRITTEN_UNVERIFIED
 - **Updated:** 2026-11-25
-- **Previous phase:** P03 - DONE (local verify green, 2026-11-25)
+- **Previous phase:** P04 - DONE (local verify green, 2026-11-25)
+
+## P05 code (company Claude sandbox, 2026-11-25)
+
+Status **CODE_WRITTEN_UNVERIFIED**. Written by the company Claude sandbox (write files only).
+Nothing was compiled, tested or run, and no git command was run. Verify has **not** been run;
+there is no verify output to record.
+
+Scope: `RosterRepairer` does a batch repair of a published roster after a `SickCall`. Seats that
+started before the report are pinned (`@PlanningPin`). The sick employee's seats in the sick period
+are freed. All other seats start from the published roster, with S3 stability against it. One solve
+runs through the existing `RosterSolver`; no `ProblemChange`. Output: `RepairResult` (repaired
+roster, change list, unassigned seats with reasons, pinned seats). New `fixtures/sick` (mini plus E3
+Wed 14-20; expected repair S06 E2 → E3). The determinism test is written but `@Disabled`
+(UNVERIFIED). ROADMAP P05 changed from Ingestion to this scope (reason recorded there).
+
+Timefold usage and assumptions: `.agent/QUESTIONS.md` P05 §G/§H. Details, risks and the file list:
+`.agent/HANDOFF.md`.
+
+Verify command for local Windows:
+
+```powershell
+pwsh -NoProfile -File scripts/verify.ps1 p05
+```
 
 ## P04 code (company Claude sandbox, 2026-11-25)
 
@@ -842,6 +865,7 @@ P04 verify passed.
 | P02 | `pwsh -NoProfile -File scripts/verify.ps1 p02` | DONE — exit code 0, 4 OK / 0 WARN / 0 FAIL | 2026-11-20 |
 | P03 | `pwsh -NoProfile -File scripts/verify.ps1 p03` | DONE - exit code 0, 4 OK / 0 WARN / 0 FAIL | 2026-11-25 |
 | P04 | `pwsh -NoProfile -File scripts/verify.ps1 p04` | DONE - exit code 0, 4 OK / 0 WARN / 0 FAIL | 2026-11-25 |
+| P05 | `pwsh -NoProfile -File scripts/verify.ps1 p05` | CODE_WRITTEN_UNVERIFIED — not run | 2026-11-25 |
 
 ## Files changed
 
@@ -885,8 +909,15 @@ P04 verify passed.
 - `.gitattributes`
 - `LICENSE`
 - P03 files: see `.agent/HANDOFF.md` history (P03 commit)
-- P04 files: see `.agent/HANDOFF.md`
+- P04 files: see `.agent/HANDOFF.md` history (P04 commit)
+- P05 files: see `.agent/HANDOFF.md`
 
 ## Next action
 
-- **P04 DONE.** All four verifies exit 0. Soft constraints S1-S4 (preferences, fairness, continuity, stability/pinning) implemented and tested; hard rules unchanged.
+- **P05 CODE_WRITTEN_UNVERIFIED.** Not DONE. (P04 DONE: all four verifies exit 0.)
+- **Company Windows PowerShell:** review, then commit and push the P05 files (list in
+  `.agent/HANDOFF.md`).
+- **Local Windows:** `git pull --rebase origin main`, then
+  `pwsh -NoProfile -File scripts/verify.ps1 p04` and `pwsh -NoProfile -File scripts/verify.ps1 p05`;
+  record the exact output and exit codes here. Mechanical compile fixes only (AGENTS.md "Who
+  changes what"); semantic problems go back to Opus. Mark P05 DONE only if `verify p05` exits 0.

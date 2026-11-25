@@ -20,7 +20,7 @@ verify command, and is checkpointed in `.agent/STATE.md`.
 | P02 | Stack & skeleton | Pick stack, project files, build + test commands | Clean build and empty test run pass |
 | P03 | Core domain model | Entities, value objects, invariants | Unit tests pass |
 | P04 | Soft constraints & fairness | S1 preferences, S2n/S2w night/weekend fairness, S3 stability, S4 contract hours | `pwsh -NoProfile -File scripts/verify.ps1 p04` exits 0 |
-| P05 | Ingestion | Parse JSON/CSV employees, shifts, availability | Fixture parse tests pass |
+| P05 | Sick-call repair | Repair a published roster after a sick call with minimum changes | `pwsh -NoProfile -File scripts/verify.ps1 p05` exits 0 |
 | P06 | Scheduler v1 | Greedy assignment | Mini fixture fully assigned, 0 hard violations |
 | P07 | Scoring | Penalty/cost function | Score improves on known cases |
 | P08 | Search | Local search / simulated annealing | Beats greedy baseline on mini fixture |
@@ -157,22 +157,44 @@ Expected: exit code 0; all P03 and P04 tests pass; ArchUnit rules hold.
 
 ---
 
-## P05 — Ingestion
+## P05 — Incremental sick-call repair
 
-**Goal:** Load input data from disk.
+**Goal:** When someone calls in sick, repair the published roster with as few changes as possible
+(CONSTRAINT-MODEL §5, simplified).
+
+**Scope changed 2026-11-25 (Samet).** The original P05 was "Ingestion: readers for the fixture
+formats into the domain model; clear parse errors". Repair was moved ahead because it builds
+directly on the P03/P04 solver and is core product value. Ingestion is not dropped: fixtures
+are already read by the test-only `FixtureLoader`, and production ingestion (validation and
+readable parse errors) moves to a later phase, to be scheduled by Samet before P11 CLI.
 
 **Deliverables**
 
-- Readers for the fixture formats (JSON/CSV) into the domain model.
-- Validation of required fields; clear parse errors.
+- Input: published roster + sick call (employee; whole local date or datetime range; report time).
+- The sick employee loses availability for the sick period from the report onward; their seats in
+  that period are freed.
+- Batch repair through the existing solver harness, with the published roster as warm start. Seats
+  that started before the report are pinned (`@PlanningPin`) and never move. Future seats move only
+  if needed; S3 stability (published roster as reference) discourages changes. No live
+  `ProblemChange`.
+- Output: repaired roster, change list against the published roster, unassigned seats with reasons.
+- `fixtures/sick` (from mini, repairable) with README; mini plus the same sick call is the
+  impossible-repair case.
+- Tests: sick seats reassigned, unaffected seats unchanged, pinned seats never move, repair has no
+  more changes than a full re-solve, impossible repair reports reasons with 0 hard. Determinism
+  test written but disabled (UNVERIFIED).
+- `scripts/verify_p05.ps1`: build + tests + ArchUnit.
+
+**Not in scope:** repair window and urgency-weighted stability (CONSTRAINT-MODEL §5.2/§5.4), manager
+locks, DB, Docker, Spring, REST.
 
 **Verify**
 
 ```powershell
-pwsh -File scripts/test.ps1
+pwsh -NoProfile -File scripts/verify.ps1 p05
 ```
 
-Expected: mini fixture round-trips; malformed fixtures produce readable errors.
+Expected: exit code 0; all P03-P05 tests pass; ArchUnit rules hold.
 
 ---
 

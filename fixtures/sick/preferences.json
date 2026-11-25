@@ -1,0 +1,7 @@
+{
+  "timezone": "Europe/Istanbul",
+  "preferences": [
+    { "employee_id": "E1", "kind": "PREFER", "target": "2026-11-23" },
+    { "employee_id": "E2", "kind": "AVOID", "target": "2026-11-27" }
+  ]
+}

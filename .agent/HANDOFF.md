@@ -1,92 +1,89 @@
-# Handoff — P04 soft constraints and fairness (company Claude sandbox → local Windows)
+# Handoff — P05 incremental sick-call repair (company Claude sandbox → local Windows)
 
 Date: 2026-11-25. Status: **CODE_WRITTEN_UNVERIFIED**. Written by the company Claude sandbox.
-Nothing was compiled, tested, run or committed; no git command was run. P03 is DONE (see STATE.md).
+Nothing was compiled, tested, run or committed; no git command was run. P04 is DONE (see STATE.md).
 
 ## Scope
 
-- S1 preferences: AVOID (seat on an avoided date) and PREFER (preferred date with no seat), from
-  `preferences.json`.
-- S2n night fairness and S2w weekend fairness: per employee `count² × 1000 / max hours`
-  (CONSTRAINT-MODEL §4). Weekend counts distinct weekends touched. Night = overlaps 00:00-06:00
-  local (D3). `loadBalance` is not used (formula UNVERIFIED).
-- S3 stability: one penalty per seat whose employee differs from `previous-roster.json`
-  (matched by shift id and seat order).
-- S4 contract hours: per (employee, week) `|assigned − contract|` minutes, plus the full
-  contract for an employee with no seat at all.
-- Not in scope: incremental repair/pinning, DB, Docker, Spring, REST.
+- **Input:** a `SchedulingProblem`, the published roster (`RosterAssignment` list) and a `SickCall`
+  (employee, sick period as a whole local date or datetime range, report time).
+- **`RosterRepairer.repair`:**
+  - The sick employee loses availability for the sick period from the report onward.
+  - Seats that started before the report are **pinned** (`@PlanningPin`).
+  - The sick employee's seats in the sick period are **freed**.
+  - Every other seat starts with its published employee, with S3 stability against the published roster.
+  - Then one batch solve through the existing `RosterSolver` (`solveSchedule`). No `ProblemChange`.
+- **Output:** `RepairResult` with the repaired roster (`SolveResult`: score, assignments, unassigned
+  seats with reasons), the change list (REASSIGNED / LEFT_EMPTY / FILLED) and the pinned seats.
+- **`fixtures/sick`:** mini plus one E3 window (Wed 14-20), the published roster, and E2 sick on Wed
+  2026-11-25 reported at 07:00. Expected repair: one change, S06 E2 → E3. See
+  `fixtures/sick/README.md`.
+- **Impossible case:** `fixtures/mini` with the same roster and sick call leaves S06 empty, with reasons.
+- **Not in scope:** repair window, urgency weighting, manager locks, DB, Docker, Spring, REST.
 
 ## What local must run
 
 ```powershell
 git pull --rebase origin main        # after company Windows commits/pushes these files
-pwsh -NoProfile -File scripts/verify.ps1 p03
 pwsh -NoProfile -File scripts/verify.ps1 p04
+pwsh -NoProfile -File scripts/verify.ps1 p05
 ```
 
 Then:
 
 1. Record the exact outputs and exit codes in `.agent/STATE.md`.
-2. Compile errors: fix only mechanically (imports, type names, overload plumbing), per AGENTS.md
-   "Who changes what". If `ifNotExists` / two-mapping `Joiners.equal` / `toSet` need a different
-   stream shape, stop and hand back (QUESTIONS.md P04 §D).
-3. After a green run, add D1-D5 (QUESTIONS.md P04 §D) and the P03 A-items to CONFIRMED in
-   `docs/design/TIMEFOLD-VERIFIED.md`, with the run as evidence.
-4. Mark P04 DONE only if `verify p04` exits 0.
+2. Compile errors: mechanical fixes only (AGENTS.md "Who changes what"). Any change to repair rules,
+   fixture data or test expectations goes back to Opus.
+3. After a green run:
+   - Record in `docs/design/TIMEFOLD-VERIFIED.md` that the solver honours `@PlanningPin`
+     (QUESTIONS.md G1), with `SickRepairTest.pastPinnedAssignmentsNeverMove` as evidence.
+   - Also move the P04 D-items to CONFIRMED.
+4. Mark P05 DONE only if `verify p05` exits 0.
 
 ## Expected result (predicted, not observed)
 
-| Check | Prediction | Why |
-| --- | --- | --- |
-| p03 | still passes | hard/medium unchanged; soft rules cannot change medium or hard |
-| p04 layout, archunit | OK | no Timefold in domain |
-| p04 build | OK if D1-D3 compile | see risks |
-| `SoftConstraintProviderTest` (16 tests) | OK | expected values hand-computed from our own formulas |
-| `SoftSolveTest` (7 tests) | OK | each problem has one unique soft optimum; about 3 s per solve |
-| `PlanningMapperCalendarTest` (3 tests) | OK | D3 calendar arithmetic |
-| `MiniFixtureSolveTest`, `TightFixtureSolveTest` | OK | they assert hard/medium/unassigned only |
+| Test | Prediction |
+| --- | --- |
+| P03/P04 tests | Unchanged and pass. `ShiftSeat` gained a pin field that defaults to false; `RosterSolver.solve` now delegates to `solveSchedule` |
+| `SickCallTest` (5), `TimeRangeTest` (+2) | Pass (plain Java) |
+| `RepairPreparationTest` (6) | Pass (no solver) |
+| `SickRepairTest` (5 run + 1 disabled) | Pass. Repair = 1 change (S06 → E3); impossible case: hard 0, medium −360, S06 empty with "E2: not available …" |
 
 ## Known risks
 
-- **Unverified API (QUESTIONS.md P04 §D):** `ifNotExists` with two-mapping `Joiners.equal`
-  (in `preferredDateMissed` and `contractUnused`), the `toSet` signature (in `weekendFairness`),
-  and `forEach` over problem facts.
-- **Weekend solver test needs local search to accept worse moves.** Going from (all to E1) to
-  (one weekend each) passes through a worse state. Timefold's default local search should do it
-  within the 3 s unimproved limit. If `weekendFairness_solverGivesEachEmployeeOneWholeWeekend`
-  is flaky, report it. Don't loosen the assertion; that is a semantic change.
-- **Domain record changes:** `Employee` has a new `contractHoursPerWeek` component (6-arg canonical
-  constructor; the 2-arg constructor is kept). `SchedulingProblem` has `preferences` and
-  `previousAssignments` (5-arg canonical constructor; the 3-arg constructor is kept). Every
-  call site in the repo is updated.
-- **Soft weights are placeholders** (`SoftWeights`).
-- **REQUIREMENTS.md not updated** for S2/S4 wording (QUESTIONS.md P04 F8).
+- **G1 pin behaviour** is proven only by this run. If a pinned seat moves, that is a semantic
+  problem: hand back, don't loosen the test.
+- **`unaffectedAssignmentsStayUnchanged` asserts exactly one change.** This relies on stability
+  (1000 per change) outweighing every other soft gain from moving a seat. I checked the fixture by
+  hand: the biggest single-move gain is below 1000.
+- **Determinism test is `@Disabled`** (UNVERIFIED, QUESTIONS.md G3).
+- **Each solver-based repair test takes about 3 s or more** (wall-clock termination, 3 s unimproved).
+  `repairChangesNoMoreThanFullResolve` runs two solves.
+- **ROADMAP P05 was Ingestion.** It is now sick-call repair; ingestion is deferred (QUESTIONS.md H8).
 
 ## Changed files
 
 Modified:
 
-- `AGENTS.md`: new "Who changes what" section (Opus vs local opencode); nothing else changed
-- `docs/plan/ROADMAP.md`: P04 row and section, with the reason for the change
-- `scripts/verify.ps1`: register `p04`
+- `docs/plan/ROADMAP.md`: P05 row and section, with the reason for the change
+- `scripts/verify.ps1`: register `p05`
 - `.agent/STATE.md`, `.agent/HANDOFF.md`, `.agent/QUESTIONS.md`
-- `domain/src/main/java/dev/rota/domain/Employee.java`: `contractHoursPerWeek`
-- `domain/src/main/java/dev/rota/domain/SchedulingProblem.java`: `preferences`, `previousAssignments`
-- `solver/src/main/java/dev/rota/solver/PlanningEmployee.java`: contract minutes, horizon weeks, avoid dates
-- `solver/src/main/java/dev/rota/solver/ShiftSeat.java`: local date, night, weekend key, previous employee
-- `solver/src/main/java/dev/rota/solver/RotaSchedule.java`: `preferences` fact collection
-- `solver/src/main/java/dev/rota/solver/PlanningMapper.java`: calendar facts, preferences, previous roster
-- `solver/src/main/java/dev/rota/solver/Scores.java`: `soft(weight)`
-- `solver/src/main/java/dev/rota/solver/RotaConstraintProvider.java`: 7 soft constraints added; hard/medium unchanged
-- `solver/src/test/java/dev/rota/solver/fixture/FixtureLoader.java`: contract hours, preferences, previous roster
+- `domain/src/main/java/dev/rota/domain/TimeRange.java`: `minus`
+- `domain/src/main/java/dev/rota/domain/Employee.java`: `withoutAvailability`
+- `domain/src/test/java/dev/rota/domain/TimeRangeTest.java`: two `minus` tests
+- `solver/src/main/java/dev/rota/solver/ShiftSeat.java`: `@PlanningPin boolean pinned`
+- `solver/src/main/java/dev/rota/solver/RosterSolver.java`: package-private `solveSchedule` (warm start)
+- `solver/src/test/java/dev/rota/solver/fixture/FixtureLoader.java`: `publishedRoster`, `sickCall`
 
 New:
 
-- `domain/src/main/java/dev/rota/domain/Preference.java`, `PreviousAssignment.java`
-- `domain/src/test/java/dev/rota/domain/SchedulingProblemTest.java`
-- `solver/src/main/java/dev/rota/solver/PlanningPreference.java`, `SoftWeights.java`
-- `solver/src/test/java/dev/rota/solver/SoftConstraintProviderTest.java`, `SoftSolveTest.java`,
-  `PlanningMapperCalendarTest.java`
-- `scripts/verify_p04.ps1`
+- `domain/src/main/java/dev/rota/domain/SickCall.java`, `RosterAssignment.java`
+- `domain/src/test/java/dev/rota/domain/SickCallTest.java`
+- `solver/src/main/java/dev/rota/solver/RosterRepairer.java`, `RepairResult.java`
+- `solver/src/test/java/dev/rota/solver/RepairPreparationTest.java`, `SickRepairTest.java`
+- `fixtures/sick/`: `employees.json`, `availability.json`, `shifts.csv`, `preferences.json`,
+  `published-roster.json`, `sick-call.json`, `README.md`
+- `scripts/verify_p05.ps1`
 
-Not changed: fixtures, REQUIREMENTS, STACK, DECISIONS, TIMEFOLD-VERIFIED, P03 tests, `verify_p03.ps1`.
+Not changed: constraints, weights, `fixtures/mini`, `fixtures/tight`, REQUIREMENTS, STACK,
+DECISIONS, TIMEFOLD-VERIFIED, AGENTS.md.

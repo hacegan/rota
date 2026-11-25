@@ -1,0 +1,19 @@
+{
+  "timezone": "Europe/Istanbul",
+  "assignments": [
+    { "shift_id": "S01", "seat": 0, "employee_id": "E1" },
+    { "shift_id": "S02", "seat": 0, "employee_id": "E2" },
+    { "shift_id": "S03", "seat": 0, "employee_id": "E1" },
+    { "shift_id": "S04", "seat": 0, "employee_id": "E2" },
+    { "shift_id": "S05", "seat": 0, "employee_id": "E1" },
+    { "shift_id": "S06", "seat": 0, "employee_id": "E2" },
+    { "shift_id": "S07", "seat": 0, "employee_id": "E1" },
+    { "shift_id": "S08", "seat": 0, "employee_id": "E2" },
+    { "shift_id": "S09", "seat": 0, "employee_id": "E3" },
+    { "shift_id": "S10", "seat": 0, "employee_id": "E2" },
+    { "shift_id": "S11", "seat": 0, "employee_id": "E1" },
+    { "shift_id": "S12", "seat": 0, "employee_id": "E3" },
+    { "shift_id": "S13", "seat": 0, "employee_id": "E3" },
+    { "shift_id": "S14", "seat": 0, "employee_id": "E1" }
+  ]
+}

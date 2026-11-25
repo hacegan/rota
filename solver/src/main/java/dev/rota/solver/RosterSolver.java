@@ -36,8 +36,16 @@ public final class RosterSolver {
     }
 
     public SolveResult solve(SchedulingProblem problem) {
+        return SolveResult.of(solveSchedule(PlanningMapper.toSchedule(problem)));
+    }
+
+    /**
+     * Solves a prepared schedule. Seats that already hold an employee are the starting point (warm
+     * start); pinned seats are not changed. Used by {@link RosterRepairer} for batch repair, no
+     * live {@code ProblemChange}.
+     */
+    RotaSchedule solveSchedule(RotaSchedule schedule) {
         Solver<RotaSchedule> solver = solverFactory.buildSolver();
-        RotaSchedule solved = solver.solve(PlanningMapper.toSchedule(problem));
-        return SolveResult.of(solved);
+        return solver.solve(schedule);
     }
 }

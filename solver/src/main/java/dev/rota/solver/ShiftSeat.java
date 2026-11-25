@@ -2,6 +2,7 @@ package dev.rota.solver;
 
 import ai.timefold.solver.core.api.domain.common.PlanningId;
 import ai.timefold.solver.core.api.domain.entity.PlanningEntity;
+import ai.timefold.solver.core.api.domain.entity.PlanningPin;
 import ai.timefold.solver.core.api.domain.variable.PlanningVariable;
 import dev.rota.domain.TimeRange;
 
@@ -36,6 +37,13 @@ public class ShiftSeat {
     private int weekendKey;
     /** Employee id on this seat in previous-roster.json, or null (S3). */
     private String previousEmployeeId;
+    /**
+     * P05 repair: the seat started before the sick call was reported, so it is history and the
+     * solver must not change it. {@code @PlanningPin} is CONFIRMED (marker annotation); that the
+     * solver honours it is proven by {@code SickRepairTest.pastPinnedAssignmentsNeverMove}.
+     */
+    @PlanningPin
+    private boolean pinned;
 
     @PlanningVariable(allowsUnassigned = true)
     private PlanningEmployee employee;
@@ -144,6 +152,14 @@ public class ShiftSeat {
 
     public void setPreviousEmployeeId(String previousEmployeeId) {
         this.previousEmployeeId = previousEmployeeId;
+    }
+
+    public boolean isPinned() {
+        return pinned;
+    }
+
+    public void setPinned(boolean pinned) {
+        this.pinned = pinned;
     }
 
     public PlanningEmployee getEmployee() {

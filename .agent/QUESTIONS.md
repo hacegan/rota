@@ -118,3 +118,42 @@ the formula is verified.
 - **F8 REQUIREMENTS mismatch.** REQUIREMENTS.md lists S2 as "balance scheduled hours" and S4 as
   "out of scope: cost". P04 implements night/weekend fairness and contract-hours deviation as
   instructed. REQUIREMENTS.md was not edited; Samet should decide whether to update it.
+
+P04 status after the green local run (STATE.md, "Local verify (green, 2026-11-25, P04)"): D1-D5
+compiled and their tests passed. Local should move them to CONFIRMED in TIMEFOLD-VERIFIED.md.
+
+## P05 (2026-11-25, company Claude sandbox; nothing compiled or run)
+
+### G — Timefold usage in P05
+
+- **G1 `@PlanningPin` on a `boolean` field** (`ShiftSeat.pinned`). The annotation is CONFIRMED
+  (marker, TIMEFOLD-VERIFIED.md corrected #3). That the solver never changes a pinned entity is
+  **behaviour**, not shown by the jar. `SickRepairTest.pastPinnedAssignmentsNeverMove` proves or
+  refutes it.
+- **G2 Warm start.** `Solver.solve(schedule)` with seats already holding employees (proven API,
+  same call as P03/P04). The assumption is that the solver keeps those values as its starting
+  point instead of rebuilding from scratch. `SickRepairTest.unaffectedAssignmentsStayUnchanged`
+  checks the outcome. Even a cold start would be pulled back by S3 stability, so that test proves
+  the result, not the mechanism.
+- **G3 Determinism: UNVERIFIED** (TIMEFOLD-VERIFIED.md #5, termination is wall-clock).
+  `SickRepairTest.repeatedRepairIsDeterministic` is written but `@Disabled`. Enable it only after
+  determinism is CONFIRMED.
+- **No `ProblemChange`.** The repair is a batch re-solve (`RosterRepairer`).
+
+### H — Assumptions in P05 code (please confirm or correct)
+
+- **H1 "Now" = report time.** `SickCall.reportedAt` is the cut: a seat whose start is before it is
+  pinned (in-progress seats included). There is no separate `now` input.
+- **H2 The past is not rewritten.** Availability is removed only for the part of the sick period from
+  the report onward (`SickCall.effectivePeriod`). Otherwise pinned past seats of the sick employee
+  would show as H2 violations.
+- **H3 Freed seats have no stability reference.** Reassigning them is the point of the repair, so
+  they don't count as changes for S3. They do count in the change list.
+- **H4 Stability reference = published roster**, not `previous-roster.json` (dropped during repair).
+- **H5 No repair window** (CONSTRAINT-MODEL §5.2) and **no urgency weighting** (§5.4). All future seats
+  can move, each change costs a flat 1000 (P04 `SoftWeights.STABILITY`).
+- **H6 Pinned empty seats stay empty.** A seat published empty in the past keeps its medium penalty.
+- **H7 `fixtures/sick` adds one E3 window (Wed 14-20).** Without it the repair is impossible
+  (`fixtures/sick/README.md`).
+- **H8 ROADMAP P05 was Ingestion.** It is now sick-call repair; ingestion is deferred, to be
+  scheduled by Samet before P11 CLI.

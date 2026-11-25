@@ -1,5 +1,6 @@
 package dev.rota.domain;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -37,5 +38,14 @@ public record Employee(String id, String name, Set<String> skills, int maxHoursP
 
     public boolean hasSkill(String skill) {
         return skills.contains(skill);
+    }
+
+    /** The same employee with {@code period} removed from every availability window (sick call, P05). */
+    public Employee withoutAvailability(TimeRange period) {
+        List<TimeRange> remaining = new ArrayList<>();
+        for (TimeRange window : availability) {
+            remaining.addAll(window.minus(period));
+        }
+        return new Employee(id, name, skills, maxHoursPerWeek, contractHoursPerWeek, remaining);
     }
 }

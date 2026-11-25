@@ -3,8 +3,10 @@ package dev.rota.solver.fixture;
 import dev.rota.domain.Employee;
 import dev.rota.domain.Preference;
 import dev.rota.domain.PreviousAssignment;
+import dev.rota.domain.RosterAssignment;
 import dev.rota.domain.SchedulingProblem;
 import dev.rota.domain.Shift;
+import dev.rota.domain.SickCall;
 import dev.rota.domain.TimeRange;
 
 import java.io.IOException;
@@ -90,6 +92,49 @@ public final class FixtureLoader {
 
         return new SchedulingProblem(zone, employees, shifts(dir.resolve("shifts.csv"), zone),
                 preferences(dir.resolve("preferences.json")), previousRoster(dir.resolve("previous-roster.json")));
+    }
+
+    /** {@code published-roster.json}: {@code {"assignments":[{"shift_id","seat","employee_id"}]}} (P05). */
+    public static List<RosterAssignment> publishedRoster(String name) {
+        return publishedRoster(fixture(name).resolve("published-roster.json"));
+    }
+
+    @SuppressWarnings("unchecked")
+    public static List<RosterAssignment> publishedRoster(Path file) {
+        Map<String, Object> json = (Map<String, Object>) MiniJson.parse(read(file));
+        List<RosterAssignment> assignments = new ArrayList<>();
+        for (Object item : (List<Object>) json.get("assignments")) {
+            Map<String, Object> entry = (Map<String, Object>) item;
+            Object seat = entry.get("seat");
+            assignments.add(new RosterAssignment((String) entry.get("shift_id"),
+                    seat == null ? 0 : ((BigDecimal) seat).intValueExact(), (String) entry.get("employee_id")));
+        }
+        return assignments;
+    }
+
+    /**
+     * {@code sick-call.json}: {@code employee_id}, {@code reported_at} (ISO offset), and either
+     * {@code date} (whole local day in the file's timezone) or {@code start}/{@code end} (ISO offset) (P05).
+     */
+    public static SickCall sickCall(String name) {
+        return sickCall(fixture(name).resolve("sick-call.json"));
+    }
+
+    @SuppressWarnings("unchecked")
+    public static SickCall sickCall(Path file) {
+        Map<String, Object> json = (Map<String, Object>) MiniJson.parse(read(file));
+        Object zoneName = json.get("timezone");
+        ZoneId zone = zoneName == null ? DEFAULT_ZONE : ZoneId.of((String) zoneName);
+        TimeRange period;
+        if (json.containsKey("date")) {
+            LocalDate day = LocalDate.parse((String) json.get("date"));
+            period = new TimeRange(day.atStartOfDay(zone).toInstant(), day.plusDays(1).atStartOfDay(zone).toInstant());
+        } else {
+            period = new TimeRange(OffsetDateTime.parse((String) json.get("start")).toInstant(),
+                    OffsetDateTime.parse((String) json.get("end")).toInstant());
+        }
+        Instant reportedAt = OffsetDateTime.parse((String) json.get("reported_at")).toInstant();
+        return new SickCall((String) json.get("employee_id"), period, reportedAt);
     }
 
     private static ZoneId zone(Map<String, Object> employeesJson, Map<String, Object> availabilityJson) {
