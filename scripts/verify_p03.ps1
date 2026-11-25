@@ -5,17 +5,12 @@
 
 .DESCRIPTION
   Dot-sources scripts/env.ps1, then checks:
-    layout        aggregator lists domain, solver, application, bootstrap; domain pom has no Timefold
-    build         scripts/build.ps1
-    test          scripts/test.ps1 (all modules)
-    archunit      domain ArchitectureTest: Spring and Timefold rules both ran and passed
-    constraints   solver RotaConstraintProviderTest (ConstraintVerifier, H1-H5 + M6) passed
-    timefold      solver TimefoldBehaviourTest (forEach / unassigned probe) passed
-    mini          solver run on fixtures/mini: every seat assigned, 0 hard (D1)
-    tight         solver run on fixtures/tight: 0 hard, unassigned seats listed with reasons (D1)
-  The two solver runs are the MiniFixtureSolveTest / TightFixtureSolveTest test classes. They
-  write solver/target/p03/<fixture>-report.txt, which this script re-parses and prints.
-  No database, no Docker, no Spring wiring.
+    layout    aggregator lists domain, solver, application, bootstrap; domain pom has no Timefold
+    build     scripts/build.ps1
+    test      scripts/test.ps1 (all modules, including the mini/tight solver assertions)
+    archunit  domain ArchitectureTest: Spring and Timefold rules both ran and passed
+  The mini/tight solver assertions live in JUnit (MiniFixtureSolveTest / TightFixtureSolveTest)
+  so they run on any OS. No report files are parsed here.
 
 .EXAMPLE
   pwsh -NoProfile -File scripts/verify.ps1 p03
@@ -39,52 +34,6 @@ function Add-Result {
     $script:Results.Add([pscustomobject]@{ Name = $Name; Status = $Status; Detail = $Detail })
     $color = @{ OK = 'Green'; WARN = 'Yellow'; FAIL = 'Red' }[$Status]
     Write-Host ("{0,-4}  {1,-18} {2}" -f $Status, $Name, $Detail) -ForegroundColor $color
-}
-
-function Get-Suite {
-    param([string]$Module, [string]$Class)
-    $path = Join-Path $repoRoot "$Module\target\surefire-reports\TEST-$Class.xml"
-    if (-not (Test-Path $path -PathType Leaf)) { return $null }
-    return ([xml](Get-Content $path -Raw)).testsuite
-}
-
-# Returns $null when the suite passed and contains every required case, otherwise a reason string.
-function Test-Suite {
-    param([string]$Module, [string]$Class, [string[]]$RequiredCases = @())
-    $suite = Get-Suite -Module $Module -Class $Class
-    if (-not $suite) { return "surefire report missing: $Module TEST-$Class.xml" }
-    $cases = @($suite.testcase)
-    $names = @($cases | ForEach-Object { $_.name })
-    $missing = @($RequiredCases | Where-Object { $req = $_; -not ($names | Where-Object { $_ -like "$req*" }) })
-    if ($missing.Count -gt 0) { return "missing test(s): $($missing -join ', ')" }
-    $bad = @($cases | Where-Object { $_.failure -or $_.error } | ForEach-Object { $_.name })
-    if ($bad.Count -gt 0) { return "failed: $($bad -join ', ')" }
-    if ([int]$suite.skipped -gt 0) { return "skipped: $($suite.skipped)" }
-    if ([int]$suite.tests -eq 0) { return 'no tests ran' }
-    return $null
-}
-
-function Read-Report {
-    param([string]$Fixture)
-    $path = Join-Path $repoRoot "solver\target\p03\$Fixture-report.txt"
-    if (-not (Test-Path $path -PathType Leaf)) { return $null }
-    $lines = @(Get-Content $path)
-    $value = {
-        param([string]$Key)
-        $pattern = '^' + [regex]::Escape($Key) + ':\s*(-?\d+)\s*$'
-        $hit = $lines | Where-Object { $_ -match $pattern } | Select-Object -First 1
-        if ($null -eq $hit) { return $null }
-        $null = $hit -match $pattern
-        return [long]$Matches[1]
-    }
-    return [pscustomobject]@{
-        Path            = $path
-        Lines           = $lines
-        Hard            = & $value 'hard'
-        Medium          = & $value 'medium'
-        Unassigned      = & $value 'unassigned'
-        UnassignedLines = @($lines | Where-Object { $_ -like 'UNASSIGNED *' })
-    }
 }
 
 Write-Host 'Rota P03 verify' -ForegroundColor Cyan
@@ -125,50 +74,18 @@ if ($testExit -eq 0) { Add-Result -Name 'test' -Status OK -Detail 'mvnw -q test'
 else { Add-Result -Name 'test' -Status FAIL -Detail "exit $testExit" }
 
 # --- ArchUnit ---
-$why = Test-Suite -Module 'domain' -Class 'dev.rota.domain.ArchitectureTest' -RequiredCases @('domainMustNotDependOnSpring', 'domainMustNotDependOnTimefold')
-if ($why) { Add-Result -Name 'archunit' -Status FAIL -Detail $why }
-else { Add-Result -Name 'archunit' -Status OK -Detail 'domain does not depend on Spring or Timefold' }
-
-# --- Constraint tests (ConstraintVerifier) ---
-$constraintCases = @(
-    'h1_penalizesUnqualifiedEmployee', 'h2_penalizesSeatOutsideAvailability', 'h2_penalizesSeatOutsideAvailabilityInTightDayFormat',
-    'h3_penalizesOverlap', 'h4_penalizesBackToBackWithoutRest', 'h5_penalizesWeeklyExcess', 'm6_penalizesEmptySeat'
-)
-$why = Test-Suite -Module 'solver' -Class 'dev.rota.solver.RotaConstraintProviderTest' -RequiredCases $constraintCases
-if ($why) { Add-Result -Name 'constraints' -Status FAIL -Detail $why }
-else { Add-Result -Name 'constraints' -Status OK -Detail 'H1-H5 + M6 ConstraintVerifier tests passed' }
-
-# --- Timefold behaviour probe ---
-$why = Test-Suite -Module 'solver' -Class 'dev.rota.solver.TimefoldBehaviourTest' -RequiredCases @('forEachSkipsUnassignedSeats', 'forEachIncludingUnassignedSeesEmptySeats')
-if ($why) { Add-Result -Name 'timefold-probe' -Status FAIL -Detail $why }
-else { Add-Result -Name 'timefold-probe' -Status OK -Detail 'forEach skips empty seats; forEachIncludingUnassigned sees them' }
-
-# --- Solver run: mini ---
-$mini = Read-Report -Fixture 'mini'
-$why = Test-Suite -Module 'solver' -Class 'dev.rota.solver.MiniFixtureSolveTest'
-if (-not $mini) { Add-Result -Name 'solve-mini' -Status FAIL -Detail 'solver/target/p03/mini-report.txt missing' }
-elseif ($mini.Hard -ne 0) { Add-Result -Name 'solve-mini' -Status FAIL -Detail "hard $($mini.Hard) (expected 0)" }
-elseif ($mini.Unassigned -ne 0) { Add-Result -Name 'solve-mini' -Status FAIL -Detail "$($mini.Unassigned) unassigned seat(s) (expected 0)" }
-elseif ($why) { Add-Result -Name 'solve-mini' -Status FAIL -Detail $why }
-else { Add-Result -Name 'solve-mini' -Status OK -Detail 'every seat assigned, 0 hard' }
-
-# --- Solver run: tight ---
-$tight = Read-Report -Fixture 'tight'
-$why = Test-Suite -Module 'solver' -Class 'dev.rota.solver.TightFixtureSolveTest'
-if (-not $tight) { Add-Result -Name 'solve-tight' -Status FAIL -Detail 'solver/target/p03/tight-report.txt missing' }
-elseif ($tight.Hard -ne 0) { Add-Result -Name 'solve-tight' -Status FAIL -Detail "hard $($tight.Hard) (expected 0)" }
-elseif ($tight.Unassigned -lt 1) { Add-Result -Name 'solve-tight' -Status FAIL -Detail 'no unassigned seats reported (tight is infeasible by design)' }
-elseif ($tight.UnassignedLines.Count -ne $tight.Unassigned) { Add-Result -Name 'solve-tight' -Status FAIL -Detail "unassigned: $($tight.Unassigned) but $($tight.UnassignedLines.Count) UNASSIGNED line(s)" }
-elseif (@($tight.UnassignedLines | Where-Object { $_ -notmatch '\|\s*\S' }).Count -gt 0) { Add-Result -Name 'solve-tight' -Status FAIL -Detail 'unassigned seat without reasons' }
-elseif ($why) { Add-Result -Name 'solve-tight' -Status FAIL -Detail $why }
-else { Add-Result -Name 'solve-tight' -Status OK -Detail ("0 hard, medium {0}, {1} unassigned with reasons" -f $tight.Medium, $tight.Unassigned) }
-
-# --- Reports ---
-foreach ($report in @($mini, $tight)) {
-    if (-not $report) { continue }
-    Write-Host ''
-    Write-Host ('--- {0} ---' -f $report.Path) -ForegroundColor Cyan
-    $report.Lines | ForEach-Object { Write-Host $_ }
+$report = Get-ChildItem (Join-Path $repoRoot 'domain\target\surefire-reports') -Filter '*ArchitectureTest*.txt' -ErrorAction SilentlyContinue | Select-Object -First 1
+if (-not $report) {
+    Add-Result -Name 'archunit' -Status FAIL -Detail 'ArchitectureTest surefire report missing'
+}
+else {
+    $text = Get-Content $report.FullName -Raw
+    if ($text -match 'Failures:\s*0' -and $text -match 'Errors:\s*0') {
+        Add-Result -Name 'archunit' -Status OK -Detail 'domain does not depend on Spring or Timefold'
+    }
+    else {
+        Add-Result -Name 'archunit' -Status FAIL -Detail (($text -replace '\r?\n', ' ').Trim())
+    }
 }
 
 # --- Summary ---

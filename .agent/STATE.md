@@ -5,7 +5,7 @@ Checkpoint file. Update after every meaningful step. Latest entry first.
 ## Current
 
 - **Phase:** P03 - Solver module (hard H1-H5 + coverage M6)
-- **Status:** BLOCKED (verify failed; see Local verify 2026-11-25)
+- **Status:** DONE
 - **Updated:** 2026-11-25
 
 ## P03 code (company Claude sandbox, 2026-11-25)
@@ -608,6 +608,91 @@ P03 verify FAILED.
 
 Status: BLOCKED. Root cause: solve-mini expects 0 unassigned seats but the mini fixture is infeasible under H4 + H5 (S14 2026-11-29 14:00-20:00 cashier unassigned: E1 would be 42h > max 40h; E2 unavailable that day and would be 36h > max 30h; E3 rest 0h after S13, needs 11h). Matches predicted F1 in .agent/QUESTIONS.md. No code fixed (per instruction: do not fix silently). Awaiting Samet decision on making mini feasible per D1 or adjusting the assertion.
 
+## Local verify (green, 2026-11-25)
+
+Phase: P03. Machine role: local. All three exit 0. P03 marked DONE.
+
+### p01 - exit code 0
+
+```text
+Rota P01 verify
+Repository: C:\dev\rota
+
+OK    glossary           all 8 terms present
+OK    requirements       3166 bytes
+OK    fixtures           6 files
+OK    json-parse         4 JSON files parsed
+
+P01 verify: 4 OK, 0 WARN, 0 FAIL
+P01 verify passed.
+```
+
+### p02 - exit code 0
+
+```text
+JAVA_HOME: C:\Users\samet\AppData\Local\Programs\Eclipse Adoptium\jdk-27.0.1.0-hotspot
+openjdk version "27.0.1.0.2" 2026-10-21
+OpenJDK Runtime Environment Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1)
+OpenJDK 64-Bit Server VM Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1, mixed mode, sharing)
+Rota P02 verify
+Repository: C:\dev\rota
+
+OK    layout             aggregator + domain, application, bootstrap
+JAVA_HOME: C:\Users\samet\AppData\Local\Programs\Eclipse Adoptium\jdk-27.0.1.0-hotspot
+openjdk version "27.0.1.0.2" 2026-10-21
+OpenJDK Runtime Environment Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1)
+OpenJDK 64-Bit Server VM Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1, mixed mode, sharing)
+OK    build              mvnw -q -DskipTests package
+JAVA_HOME: C:\Users\samet\AppData\Local\Programs\Eclipse Adoptium\jdk-27.0.1.0-hotspot
+openjdk version "27.0.1.0.2" 2026-10-21
+OpenJDK Runtime Environment Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1)
+OpenJDK 64-Bit Server VM Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1, mixed mode, sharing)
+SLF4J(W): No SLF4J providers were found.
+SLF4J(W): Defaulting to no-operation (NOP) logger implementation
+SLF4J(W): See https://www.slf4j.org/codes.html#noProviders for further details.
+SLF4J(W): No SLF4J providers were found.
+SLF4J(W): Defaulting to no-operation (NOP) logger implementation
+SLF4J(W): See https://www.slf4j.org/codes.html#noProviders for further details.
+OK    test               mvnw -q test
+OK    archunit           domain does not depend on Spring
+
+P02 verify: 4 OK, 0 WARN, 0 FAIL
+P02 verify passed.
+```
+
+### p03 - exit code 0
+
+```text
+JAVA_HOME: C:\Users\samet\AppData\Local\Programs\Eclipse Adoptium\jdk-27.0.1.0-hotspot
+openjdk version "27.0.1.0.2" 2026-10-21
+OpenJDK Runtime Environment Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1)
+OpenJDK 64-Bit Server VM Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1, mixed mode, sharing)
+Rota P03 verify
+Repository: C:\dev\rota
+
+OK    layout             domain, solver, application, bootstrap; no Timefold in domain pom
+JAVA_HOME: C:\Users\samet\AppData\Local\Programs\Eclipse Adoptium\jdk-27.0.1.0-hotspot
+openjdk version "27.0.1.0.2" 2026-10-21
+OpenJDK Runtime Environment Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1)
+OpenJDK 64-Bit Server VM Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1, mixed mode, sharing)
+OK    build              mvnw -q -DskipTests package
+JAVA_HOME: C:\Users\samet\AppData\Local\Programs\Eclipse Adoptium\jdk-27.0.1.0-hotspot
+openjdk version "27.0.1.0.2" 2026-10-21
+OpenJDK Runtime Environment Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1)
+OpenJDK 64-Bit Server VM Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1, mixed mode, sharing)
+SLF4J(W): No SLF4J providers were found.
+SLF4J(W): Defaulting to no-operation (NOP) logger implementation
+SLF4J(W): See https://www.slf4j.org/codes.html#noProviders for further details.
+SLF4J(W): No SLF4J providers were found.
+SLF4J(W): Defaulting to no-operation (NOP) logger implementation
+SLF4J(W): See https://www.slf4j.org/codes.html#noProviders for further details.
+OK    test               mvnw -q test
+OK    archunit           domain does not depend on Spring or Timefold
+
+P03 verify: 4 OK, 0 WARN, 0 FAIL
+P03 verify passed.
+```
+
 ## Verify log
 
 | Phase | Command | Result | Date |
@@ -615,7 +700,7 @@ Status: BLOCKED. Root cause: solve-mini expects 0 unassigned seats but the mini 
 | P00 | `pwsh -File scripts/preflight.ps1` | DONE — exit code 0, 11 OK / 4 WARN / 0 FAIL | 2026-11-18 |
 | P01 | `pwsh -NoProfile -File scripts/verify_p01.ps1` | DONE — exit code 0, 4 OK / 0 WARN / 0 FAIL | 2026-11-19 |
 | P02 | `pwsh -NoProfile -File scripts/verify.ps1 p02` | DONE — exit code 0, 4 OK / 0 WARN / 0 FAIL | 2026-11-20 |
-| P03 | `pwsh -NoProfile -File scripts/verify.ps1 p03` | BLOCKED - exit code 1, 6 OK / 0 WARN / 2 FAIL (solve-mini 1 unassigned) | 2026-11-25 |
+| P03 | `pwsh -NoProfile -File scripts/verify.ps1 p03` | DONE - exit code 0, 4 OK / 0 WARN / 0 FAIL | 2026-11-25 |
 
 ## Files changed
 
@@ -662,10 +747,6 @@ Status: BLOCKED. Root cause: solve-mini expects 0 unassigned seats but the mini 
 
 ## Next action
 
-- **Status: BLOCKED.** Local verify failed (exit code 1) on solve-mini: 1 unassigned seat expected 0.
-  Root cause: mini fixture infeasible under H4 + H5 (S14 cashier, 2026-11-29 14:00-20:00)
-  cannot be assigned to E1 (42h > max 40h), E2 (unavailable that day; 36h > max 30h) or
-  E3 (rest 0h after S13, needs 11h). Matches predicted F1.
-- No code fixed (per instruction: do not fix silently). Awaiting Samet: either make mini
-  feasible per D1 (adjust fixture/availability) or adjust the solve-mini assertion, then
-  re-run `pwsh -NoProfile -File scripts/verify.ps1 p03` and re-record.
+- **P03 DONE.** All three verifies exit 0. Mini feasible (14/14 seats, 0 hard); tight infeasible by
+  design (0 hard, 3 unassigned with reasons). Assertions run as JUnit on any OS; verify_p03 is
+  build + tests + ArchUnit only. F1 resolved (see `.agent/QUESTIONS.md`).

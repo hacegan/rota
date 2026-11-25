@@ -2,7 +2,13 @@
 
 Written by company Claude sandbox, 2026-11-25 (P03). Nothing here was compiled or run.
 
-## F1 — BLOCKER: `fixtures/mini` cannot be fully staffed under H4 + H5
+## F1 — RESOLVED (2026-11-25): `fixtures/mini` infeasibility was genuine, not a config bug
+
+Resolved by adding one E3 availability window on Friday 2026-11-27 08:00-14:00
+(Europe/Istanbul) so E3 covers S09 (barista), reducing E1 to 24 h weekdays + 12 h weekend = 36 h.
+Mini now assigns all 14 seats with 0 hard violations. `fixtures/tight` unchanged and stays
+infeasible by design (0 hard, 3 unassigned with reasons). No constraint/weight/hard rule
+changed. See `fixtures/mini/README.md` and `docs/design/TIMEFOLD-VERIFIED.md` (F1 section).
 
 D1 says mini = every shift assigned, 0 hard violations. Under the hard rules as written,
 that is impossible. `MiniFixtureSolveTest` and `verify p03 / solve-mini` are expected to

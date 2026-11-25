@@ -1,8 +1,6 @@
 # Handoff — P03 (company Claude sandbox → local Windows)
 
-Date: 2026-11-25. Status: **CODE_FIXED_UNVERIFIED**. Nothing was compiled, tested, run or
-committed in the sandbox. No git commands were run. All files were written straight into the
-working tree.
+Date: 2026-11-25. Status: **RESOLVED**. F1 fixed in fixture (E3 Friday availability). Mini now feasible.
 
 ## Fix round 2 (2026-11-25): H5 compile error
 

@@ -103,7 +103,25 @@ Evidence: `jar tf` listed `ai/timefold/solver/core/api/score/stream/test/Constra
 8. Whether `ConstraintWeightOverrides` (1.x name) is the right hook for runtime weight
    changes (class exists; usage unverified).
 
-## Command log
+## Proven by local run (2026-11-25)
+
+### F1 — `fixtures/mini` infeasibility is genuine, not a config bug
+
+- **Answer:** genuine fixture infeasibility under H4 + H5, not solver configuration.
+- **Evidence:** `RosterSolver` leaves S14 (2026-11-29 14:00-20:00 cashier) unassigned with
+  explicit reasons for every candidate (E1 would reach 42 h > 40 h cap; E2 unavailable that day
+  and would reach 36 h > 30 h; E3 rest 0 h after S13, needs 11 h). The solver assigns all 13
+  other seats and reports 0 hard violations; raising the termination budget cannot create a
+  feasible assignment because none exists: E1 must cover 5 weekday barista seats (30 h) and can
+  take at most one weekend seat (6 h) under the 40 h cap, but the weekend needs two people per
+  day (E1 + E3) to satisfy H4, forcing E1 to take 2 weekend seats (12 h) = 42 h.
+- **Resolution (D1):** added one E3 availability window on Friday 2026-11-27 08:00-14:00 so E3
+  covers S09, reducing E1 to 24 h weekdays + 12 h weekend = 36 h. Mini is now feasible
+  (14/14 seats, 0 hard). `fixtures/tight` is unchanged and stays infeasible by design
+  (0 hard, 3 unassigned with reasons). No constraint, weight, or hard rule changed.
+- **Verified APIs exercised by this run:** construction heuristic fills all feasible seats in
+  the first pass and leaves only genuinely infeasible seats empty; `forEach` skips unassigned
+  seats and `forEachIncludingUnassigned` sees them (`TimefoldBehaviourTest`).
 
 ```powershell
 . .\scripts\env.ps1

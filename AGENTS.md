@@ -57,6 +57,15 @@ Only local Windows runs verify and marks a phase DONE. A Claude session in the L
 follows the sandbox row even though it reads the company `.agent/MACHINE.md` through the bridge;
 Samet states the sandbox role in the session.
 
+## Company sandbox environment (read-only)
+
+- The company Claude sandbox is a Linux container with **Java 11** and **no PowerShell** (`pwsh`).
+- Outbound downloads are blocked (**HTTP 403**). Never attempt to download or install a JDK,
+  PowerShell, Maven, or any tool there.
+- In the sandbox: write repo files only. Do not run `git`, builds, tests, or verify; do not
+  install anything; do not change the global environment.
+- Local Windows (role=local) is the only machine that runs verify and marks a phase DONE.
+
 ## Stack
 
 `docs/plan/STACK.md` is binding. Changing the stack requires an ADR and Samet's explicit approval.
