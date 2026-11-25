@@ -4,9 +4,31 @@ Checkpoint file. Update after every meaningful step. Latest entry first.
 
 ## Current
 
-- **Phase:** P02 — Stack & skeleton
-- **Status:** DONE
-- **Updated:** 2026-11-20
+- **Phase:** P03 — Solver module (hard H1-H5 + coverage M6)
+- **Status:** CODE_WRITTEN_UNVERIFIED
+- **Updated:** 2026-11-25
+
+## P03 code (company Claude sandbox, 2026-11-25)
+
+Status **CODE_WRITTEN_UNVERIFIED**. Written by the company Claude sandbox (write files only).
+Nothing was compiled, tested or run, and no git command was run. Verify has **not** been run;
+there is no verify output to record.
+
+Scope: new `solver` module (Timefold only here), hard H1-H5 plus medium M6 coverage,
+ConstraintVerifier tests, solver runs on `fixtures/mini` and `fixtures/tight`, `scripts/verify_p03.ps1`
+registered as `p03`. No soft constraints, fairness, repair, DB, Docker or Spring wiring.
+
+Predicted (not observed): `solve-mini` FAILs with 1 empty seat, because `fixtures/mini` is
+infeasible under H4 + H5. See `.agent/QUESTIONS.md` F1.
+
+Details, risks and the full file list: `.agent/HANDOFF.md`. Unverified Timefold API used:
+`.agent/QUESTIONS.md` §A.
+
+Verify command for local Windows:
+
+```powershell
+pwsh -NoProfile -File scripts/verify.ps1 p03
+```
 
 ## Environment
 
@@ -306,6 +328,7 @@ P02 verify passed.
 | P00 | `pwsh -File scripts/preflight.ps1` | DONE — exit code 0, 11 OK / 4 WARN / 0 FAIL | 2026-11-18 |
 | P01 | `pwsh -NoProfile -File scripts/verify_p01.ps1` | DONE — exit code 0, 4 OK / 0 WARN / 0 FAIL | 2026-11-19 |
 | P02 | `pwsh -NoProfile -File scripts/verify.ps1 p02` | DONE — exit code 0, 4 OK / 0 WARN / 0 FAIL | 2026-11-20 |
+| P03 | `pwsh -NoProfile -File scripts/verify.ps1 p03` | CODE_WRITTEN_UNVERIFIED — not run | 2026-11-25 |
 
 ## Files changed
 
@@ -348,7 +371,13 @@ P02 verify passed.
 - `.gitignore`
 - `.gitattributes`
 - `LICENSE`
+- P03 files: see `.agent/HANDOFF.md`
 
 ## Next action
 
-- P01 and P02 both DONE (verify exit code 0). P03 not started; awaiting direction.
+- **Company Windows PowerShell:** review, then commit and push the P03 files
+  (message: `feat: solver module, hard constraints and coverage [P03]`).
+- **Local Windows:** `git pull --rebase origin main`, then
+  `pwsh -NoProfile -File scripts/verify.ps1 p03`; record the exact output and exit code here.
+  Follow `.agent/HANDOFF.md`. Expect `solve-mini` to FAIL until `.agent/QUESTIONS.md` F1 is
+  resolved. Do not mark DONE unless verify exits 0.

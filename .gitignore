@@ -30,8 +30,10 @@ TestResults/
 *.pfx
 *.key
 
-# Agent scratch (keep .agent/STATE.md tracked)
+# Agent scratch (keep .agent/STATE.md, HANDOFF.md, QUESTIONS.md tracked)
 .agent/*
 !.agent/STATE.md
+!.agent/HANDOFF.md
+!.agent/QUESTIONS.md
 
 .agent/MACHINE.md

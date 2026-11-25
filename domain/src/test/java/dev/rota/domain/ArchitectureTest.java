@@ -16,4 +16,12 @@ class ArchitectureTest {
                 .resideInAPackage("..org.springframework..");
         rule.check(domainClasses);
     }
+
+    @Test
+    void domainMustNotDependOnTimefold() {
+        JavaClasses domainClasses = new ClassFileImporter().importPackages("dev.rota.domain");
+        ArchRule rule = noClasses().should().dependOnClassesThat()
+                .resideInAPackage("ai.timefold..");
+        rule.check(domainClasses);
+    }
 }

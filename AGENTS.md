@@ -44,9 +44,18 @@ Rules for AI agents working in this repository (project **Rota**, a shift schedu
 
 ## Machine role
 
-Read `.agent/MACHINE.md` before any work. `role=local` -> may run verify and mark DONE.
-`role=company` -> write code/docs only, never verify, never mark DONE.
-File missing -> STOP and ask Samet. Never infer the machine from the tool you run in.
+Read `.agent/MACHINE.md` before any work. File missing -> STOP and ask Samet. Never infer the
+machine from the tool you run in.
+
+| Machine | May | Must not |
+| --- | --- | --- |
+| **company Claude sandbox** (Linux sandbox; reaches the repo through the desktop bridge) | write repo files | run git, build, test or verify; install anything; change the global environment |
+| **company Windows PowerShell** (`role=company`) | commit and push | run verify for the record; mark DONE |
+| **local Windows** (`role=local`) | run verify; mark DONE | — |
+
+Only local Windows runs verify and marks a phase DONE. A Claude session in the Linux sandbox
+follows the sandbox row even though it reads the company `.agent/MACHINE.md` through the bridge;
+Samet states the sandbox role in the session.
 
 ## Stack
 
@@ -56,4 +65,3 @@ File missing -> STOP and ask Samet. Never infer the machine from the tool you ru
 
 Never hardcode absolute machine paths in tracked files. Machine-specific values live in
 `.agent/MACHINE.md` (gitignored). All build/test scripts must dot-source `scripts/env.ps1`.
-
