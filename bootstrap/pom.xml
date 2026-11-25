@@ -12,7 +12,7 @@
 
   <artifactId>rota-bootstrap</artifactId>
   <name>rota-bootstrap</name>
-  <description>Spring Boot application</description>
+  <description>Spring Boot application: REST API, adapters, wiring (P06)</description>
 
   <dependencies>
     <dependency>
@@ -20,9 +20,24 @@
       <artifactId>rota-application</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <!-- Solver adapter (SolverSchedulingAdapter). Timefold arrives transitively; only the solver
+         module's own classes are used here. -->
+    <dependency>
+      <groupId>dev.rota</groupId>
+      <artifactId>rota-solver</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <!-- Spring MVC + embedded server + JSON. Boot 4 starter name; version from the Boot parent.
+         UNVERIFIED (QUESTIONS.md P06 J2): fallback is spring-boot-starter-web. -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter</artifactId>
+      <artifactId>spring-boot-starter-webmvc</artifactId>
+    </dependency>
+    <!-- JUnit, spring-test (MockMvc), json-path, Hamcrest; version from the Boot parent. -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 

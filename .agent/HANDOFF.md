@@ -1,89 +1,112 @@
-# Handoff — P05 incremental sick-call repair (company Claude sandbox → local Windows)
+# Handoff — P06 REST API v1 (company Claude sandbox → local Windows)
 
 Date: 2026-11-25. Status: **CODE_WRITTEN_UNVERIFIED**. Written by the company Claude sandbox.
-Nothing was compiled, tested, run or committed; no git command was run. P04 is DONE (see STATE.md).
+Nothing was compiled, tested, run or committed; no git command was run. P05 is DONE (see STATE.md).
 
 ## Scope
 
-- **Input:** a `SchedulingProblem`, the published roster (`RosterAssignment` list) and a `SickCall`
-  (employee, sick period as a whole local date or datetime range, report time).
-- **`RosterRepairer.repair`:**
-  - The sick employee loses availability for the sick period from the report onward.
-  - Seats that started before the report are **pinned** (`@PlanningPin`).
-  - The sick employee's seats in the sick period are **freed**.
-  - Every other seat starts with its published employee, with S3 stability against the published roster.
-  - Then one batch solve through the existing `RosterSolver` (`solveSchedule`). No `ProblemChange`.
-- **Output:** `RepairResult` with the repaired roster (`SolveResult`: score, assignments, unassigned
-  seats with reasons), the change list (REASSIGNED / LEFT_EMPTY / FILLED) and the pinned seats.
-- **`fixtures/sick`:** mini plus one E3 window (Wed 14-20), the published roster, and E2 sick on Wed
-  2026-11-25 reported at 07:00. Expected repair: one change, S06 E2 → E3. See
-  `fixtures/sick/README.md`.
-- **Impossible case:** `fixtures/mini` with the same roster and sick call leaves S06 empty, with reasons.
-- **Not in scope:** repair window, urgency weighting, manager locks, DB, Docker, Spring, REST.
+- **Contract first:** `docs/contracts/openapi/rota.yaml` (OpenAPI 3.1). Controllers and tests follow it.
+- **application module (pure Java; no Spring, no Timefold):**
+  - Use cases `SolveRoster`, `RepairSickCall`, `GetRoster`.
+  - Ports `SchedulingPort`, `FixturePort`, `RosterRepository`.
+  - Result types `Roster` and `RosterPlan` (score summary, assignments, unassigned seats with
+    reasons, changes, pinned seats).
+  - Exceptions `UnknownFixtureException` and `RosterNotFoundException`.
+- **bootstrap module (Spring Boot):**
+  - `RotaConfiguration` wires the use cases to:
+    - `SolverSchedulingAdapter`, which maps `SolveResult`/`RepairResult` to `RosterPlan`;
+    - `InMemoryRosterRepository` (ConcurrentHashMap);
+    - `FixtureFiles` + `FixtureJson`, which read `fixtures/` (the same formats as the test `FixtureLoader`).
+  - Controllers: `HealthController`, `RosterController`.
+  - DTOs `RosterResponse` and `ErrorResponse`.
+  - `ApiExceptionHandler`: unknown fixture or missing parameter returns 400; unknown id returns 404.
+- **Endpoints:**
+  - `GET /api/health`
+  - `POST /api/rosters/solve?fixture=mini|tight` (201 + Location)
+  - `POST /api/rosters/repair?fixture=sick` (201 + Location)
+  - `GET /api/rosters/{id}`
+- **Scripts:**
+  - `scripts/run-api.ps1`: dot-sources `env.ps1`, runs `mvnw -q -DskipTests package` (never
+    `clean`), then `java -jar` on the bootstrap jar with `--rota.fixtures-dir`.
+  - `scripts/verify_p06.ps1`: layout, build, test, MockMvc report, ArchUnit. Registered as `p06`.
+- **Not in scope:** DB, Docker, Kafka, Next.js, auth, uploading problems. No solver or constraint
+  change.
 
 ## What local must run
 
 ```powershell
 git pull --rebase origin main        # after company Windows commits/pushes these files
-pwsh -NoProfile -File scripts/verify.ps1 p04
 pwsh -NoProfile -File scripts/verify.ps1 p05
+pwsh -NoProfile -File scripts/verify.ps1 p06
 ```
 
 Then:
 
 1. Record the exact outputs and exit codes in `.agent/STATE.md`.
-2. Compile errors: mechanical fixes only (AGENTS.md "Who changes what"). Any change to repair rules,
-   fixture data or test expectations goes back to Opus.
-3. After a green run:
-   - Record in `docs/design/TIMEFOLD-VERIFIED.md` that the solver honours `@PlanningPin`
-     (QUESTIONS.md G1), with `SickRepairTest.pastPinnedAssignmentsNeverMove` as evidence.
-   - Also move the P04 D-items to CONFIRMED.
-4. Mark P05 DONE only if `verify p05` exits 0.
+2. Compile or dependency errors: mechanical fixes only (AGENTS.md "Who changes what"). Expected
+   candidates, all listed in QUESTIONS.md §J:
+   - J2: starter name `spring-boot-starter-webmvc` → `spring-boot-starter-web`;
+   - J4: JUnit version alignment in `bootstrap/pom.xml`;
+   - J3: a moved Spring test import.
+
+   Any change to endpoints, status codes, JSON shape, use-case rules or test expectations goes back
+   to Opus.
+3. Optional smoke test:
+   - Run `pwsh -NoProfile -File scripts/run-api.ps1`.
+   - In a second shell:
+     `Invoke-RestMethod -Method Post 'http://localhost:8080/api/rosters/solve?fixture=mini'`
+     and `Invoke-RestMethod 'http://localhost:8080/api/rosters/r1'`.
+   - Stop the first shell with Ctrl+C.
+4. Mark P06 DONE only if `verify p06` exits 0.
 
 ## Expected result (predicted, not observed)
 
 | Test | Prediction |
 | --- | --- |
-| P03/P04 tests | Unchanged and pass. `ShiftSeat` gained a pin field that defaults to false; `RosterSolver.solve` now delegates to `solveSchedule` |
-| `SickCallTest` (5), `TimeRangeTest` (+2) | Pass (plain Java) |
-| `RepairPreparationTest` (6) | Pass (no solver) |
-| `SickRepairTest` (5 run + 1 disabled) | Pass. Repair = 1 change (S06 → E3); impossible case: hard 0, medium −360, S06 empty with "E2: not available …" |
+| P03-P05 tests | Unchanged and pass; no domain or solver file was modified |
+| `UseCasesTest` (8), `ApplicationArchitectureTest` (3) | Pass (plain Java + ArchUnit, no solver) |
+| `FixtureFilesTest` (5) | Pass (reads repo fixtures) |
+| `RosterApiTest` (8) | Pass. mini: hard 0, medium 0, 0 unassigned. tight: medium −1080, 3 unassigned with reasons. sick repair: 1 change S06#0 E2 → E3. Four real solves, about 3 s or more each |
 
 ## Known risks
 
-- **G1 pin behaviour** is proven only by this run. If a pinned seat moves, that is a semantic
-  problem: hand back, don't loosen the test.
-- **`unaffectedAssignmentsStayUnchanged` asserts exactly one change.** This relies on stability
-  (1000 per change) outweighing every other soft gain from moving a seat. I checked the fixture by
-  hand: the biggest single-move gain is below 1000.
-- **Determinism test is `@Disabled`** (UNVERIFIED, QUESTIONS.md G3).
-- **Each solver-based repair test takes about 3 s or more** (wall-clock termination, 3 s unimproved).
-  `repairChangesNoMoreThanFullResolve` runs two solves.
-- **ROADMAP P05 was Ingestion.** It is now sick-call repair; ingestion is deferred (QUESTIONS.md H8).
+- **Spring Boot 4 specifics are UNVERIFIED** (QUESTIONS.md §J): the starter name, the Jackson 3
+  serialization of records and nulls, and what `spring-boot-starter-test` contains.
+- **`RosterApiTest` repeats solver expectations** (tight medium −1080, sick = exactly one change).
+  They rely on the same solver runs the solver tests already assert. If they fail here but pass in
+  the solver module, that points to wiring or fixture loading, not the solver.
+- **Synchronous solve.** Each POST blocks for about 3-30 s (QUESTIONS.md K5).
+- **Duplicate fixture reader** (QUESTIONS.md K2). The test `FixtureLoader` was not touched (the
+  sandbox can't stage files 8 folders deep).
+- **ROADMAP P07/P08** still mention greedy (QUESTIONS.md K1); Samet to re-scope.
 
 ## Changed files
 
 Modified:
 
-- `docs/plan/ROADMAP.md`: P05 row and section, with the reason for the change
-- `scripts/verify.ps1`: register `p05`
+- `application/pom.xml`: junit-jupiter 6.1.3 and archunit 1.5.1 (test)
+- `bootstrap/pom.xml`: `rota-solver`, `spring-boot-starter-webmvc`, `spring-boot-starter-test`
+  (test); `spring-boot-starter` removed (included by webmvc)
+- `scripts/verify.ps1`: register `p06`
+- `docs/plan/ROADMAP.md`: P06 row and section, with the reason for the change
 - `.agent/STATE.md`, `.agent/HANDOFF.md`, `.agent/QUESTIONS.md`
-- `domain/src/main/java/dev/rota/domain/TimeRange.java`: `minus`
-- `domain/src/main/java/dev/rota/domain/Employee.java`: `withoutAvailability`
-- `domain/src/test/java/dev/rota/domain/TimeRangeTest.java`: two `minus` tests
-- `solver/src/main/java/dev/rota/solver/ShiftSeat.java`: `@PlanningPin boolean pinned`
-- `solver/src/main/java/dev/rota/solver/RosterSolver.java`: package-private `solveSchedule` (warm start)
-- `solver/src/test/java/dev/rota/solver/fixture/FixtureLoader.java`: `publishedRoster`, `sickCall`
 
 New:
 
-- `domain/src/main/java/dev/rota/domain/SickCall.java`, `RosterAssignment.java`
-- `domain/src/test/java/dev/rota/domain/SickCallTest.java`
-- `solver/src/main/java/dev/rota/solver/RosterRepairer.java`, `RepairResult.java`
-- `solver/src/test/java/dev/rota/solver/RepairPreparationTest.java`, `SickRepairTest.java`
-- `fixtures/sick/`: `employees.json`, `availability.json`, `shifts.csv`, `preferences.json`,
-  `published-roster.json`, `sick-call.json`, `README.md`
-- `scripts/verify_p05.ps1`
+- `docs/contracts/openapi/rota.yaml`
+- `application/src/main/java/dev/rota/application/`: `Roster.java`, `RosterPlan.java`,
+  `SchedulingPort.java`, `FixturePort.java`, `RosterRepository.java`, `SolveRoster.java`,
+  `RepairSickCall.java`, `GetRoster.java`, `UnknownFixtureException.java`,
+  `RosterNotFoundException.java`
+- `application/src/test/java/dev/rota/application/`: `UseCasesTest.java`,
+  `ApplicationArchitectureTest.java`
+- `bootstrap/src/main/java/dev/rota/bootstrap/`: `RotaConfiguration.java`,
+  `SolverSchedulingAdapter.java`, `InMemoryRosterRepository.java`, `FixtureFiles.java`,
+  `FixtureJson.java`, `RosterController.java`, `HealthController.java`, `ApiExceptionHandler.java`,
+  `RosterResponse.java`, `ErrorResponse.java`
+- `bootstrap/src/main/resources/application.properties`
+- `bootstrap/src/test/java/dev/rota/bootstrap/`: `RosterApiTest.java`, `FixtureFilesTest.java`
+- `scripts/run-api.ps1`, `scripts/verify_p06.ps1`
 
-Not changed: constraints, weights, `fixtures/mini`, `fixtures/tight`, REQUIREMENTS, STACK,
-DECISIONS, TIMEFOLD-VERIFIED, AGENTS.md.
+Not changed: domain, solver (main and test), fixtures, constraints, weights, REQUIREMENTS, STACK,
+DECISIONS, TIMEFOLD-VERIFIED, AGENTS.md, `RotaApplication.java`, root `pom.xml`.

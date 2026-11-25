@@ -21,7 +21,7 @@ verify command, and is checkpointed in `.agent/STATE.md`.
 | P03 | Core domain model | Entities, value objects, invariants | Unit tests pass |
 | P04 | Soft constraints & fairness | S1 preferences, S2n/S2w night/weekend fairness, S3 stability, S4 contract hours | `pwsh -NoProfile -File scripts/verify.ps1 p04` exits 0 |
 | P05 | Sick-call repair | Repair a published roster after a sick call with minimum changes | `pwsh -NoProfile -File scripts/verify.ps1 p05` exits 0 |
-| P06 | Scheduler v1 | Greedy assignment | Mini fixture fully assigned, 0 hard violations |
+| P06 | REST API v1 | Runnable Spring Boot API around the solver: solve, repair, get roster | `pwsh -NoProfile -File scripts/verify.ps1 p06` exits 0 |
 | P07 | Scoring | Penalty/cost function | Score improves on known cases |
 | P08 | Search | Local search / simulated annealing | Beats greedy baseline on mini fixture |
 | P09 | Optimization (optional) | CP-SAT / ILP exact solve | Matches brute force on small fixture |
@@ -198,22 +198,42 @@ Expected: exit code 0; all P03-P05 tests pass; ArchUnit rules hold.
 
 ---
 
-## P06 — Scheduler v1
+## P06 — REST API v1
 
-**Goal:** Produce a complete, legal assignment.
+**Goal:** A runnable REST API around the solver, so the P03-P05 engine can be used over HTTP.
+
+**Scope changed 2026-11-25 (Samet).** The original P06 was "Scheduler v1: greedy assignment with
+hard-constraint checks; mini fixture fully assigned, 0 hard violations". The Timefold solver
+(P03-P05) already produces complete, legal assignments and the mini fixture is already fully
+assigned with hard 0 (P03 verify), so a hand-written greedy scheduler would duplicate the binding
+engine (STACK.md) and add nothing. P06 instead exposes the existing engine through Spring Web
+(the stack's REST choice). P14 keeps the fuller API (list/create schedules, request validation,
+problem+json errors) on top of P13 persistence.
 
 **Deliverables**
 
-- Greedy assignment: sort shifts, assign best-fit available qualified employee.
-- Hard-constraint checks during assignment.
+- Contract first: `docs/contracts/openapi/rota.yaml`.
+- Application use cases `SolveRoster`, `RepairSickCall`, `GetRoster` with pure-Java ports
+  (`SchedulingPort`, `FixturePort`, `RosterRepository`); no Spring, no Timefold in `application`.
+- Bootstrap Spring Boot app wiring the use cases to a solver adapter, an in-memory roster
+  repository, and a fixture adapter over `fixtures/`.
+- Endpoints: `GET /api/health`; `POST /api/rosters/solve?fixture=mini|tight`;
+  `POST /api/rosters/repair?fixture=sick`; `GET /api/rosters/{id}`. JSON DTOs: roster, score
+  summary, unassigned seats with reasons, change list. Unknown fixture 400, unknown id 404.
+- `scripts/run-api.ps1`: dot-sources `env.ps1`, starts the bootstrap app.
+- Tests: MockMvc integration tests for every endpoint, application unit tests with fakes,
+  ArchUnit (domain and application: no Spring, no Timefold).
+- `scripts/verify_p06.ps1`: build + tests + MockMvc report + ArchUnit.
+
+**Not in scope:** database, Docker, Kafka, Next.js/UI, auth, uploading problems over HTTP.
 
 **Verify**
 
 ```powershell
-pwsh -File scripts/verify.ps1 p06
+pwsh -NoProfile -File scripts/verify.ps1 p06
 ```
 
-Expected: mini fixture fully assigned with zero hard violations.
+Expected: exit code 0; all P03-P06 tests pass; ArchUnit rules hold.
 
 ---
 

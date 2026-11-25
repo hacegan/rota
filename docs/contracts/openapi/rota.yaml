@@ -1,0 +1,237 @@
+openapi: 3.1.0
+info:
+  title: Rota API
+  version: 0.1.0
+  description: |
+    P06 REST surface around the Timefold solver. Contract-first: the bootstrap controllers and
+    their MockMvc tests follow this file. Changes to the API start here.
+
+    Scope (P06): solve a fixture, repair the sick fixture, read back a stored roster.
+    Rosters are kept in memory only (no database); they are lost on restart.
+    Fixtures are read from the repository's `fixtures/` folder. Only the names listed per
+    endpoint are accepted.
+
+    Times are ISO-8601 offset date-times in the roster's zone (for example
+    `2026-11-23T07:00+03:00`). Seat ids have the form `<shiftId>#<seatIndex>`, for example `S01#0`.
+servers:
+  - url: http://localhost:8080
+paths:
+  /api/health:
+    get:
+      operationId: health
+      summary: Liveness check
+      responses:
+        '200':
+          description: The application is running.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
+  /api/rosters/solve:
+    post:
+      operationId: solveRoster
+      summary: Solve a fixture and store the resulting roster
+      parameters:
+        - name: fixture
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [mini, tight]
+      responses:
+        '201':
+          description: Roster solved and stored. `changes` and `pinnedSeatIds` are always empty for a solve.
+          headers:
+            Location:
+              description: URL of the stored roster, `/api/rosters/{id}`.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Roster'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  /api/rosters/repair:
+    post:
+      operationId: repairSickCall
+      summary: Repair the fixture's published roster after its sick call, and store the result
+      description: |
+        Reads `published-roster.json` and `sick-call.json` from the fixture. Seats that started
+        before the sick call was reported are pinned and never change. `changes` lists every seat
+        whose employee differs from the published roster.
+      parameters:
+        - name: fixture
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [sick]
+      responses:
+        '201':
+          description: Roster repaired and stored.
+          headers:
+            Location:
+              description: URL of the stored roster, `/api/rosters/{id}`.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Roster'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  /api/rosters/{id}:
+    get:
+      operationId: getRoster
+      summary: Read a stored roster
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The stored roster.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Roster'
+        '404':
+          description: No roster with this id (rosters are in memory and lost on restart).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  responses:
+    BadRequest:
+      description: |
+        `unknown_fixture`: the fixture name is not accepted by this endpoint.
+        `missing_parameter`: the `fixture` query parameter is missing.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  schemas:
+    Health:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [UP]
+    Error:
+      type: object
+      required: [error, message]
+      properties:
+        error:
+          type: string
+          enum: [unknown_fixture, missing_parameter, roster_not_found]
+        message:
+          type: string
+    Roster:
+      type: object
+      required: [id, fixture, operation, zone, score, assignments, unassigned, changes, pinnedSeatIds]
+      properties:
+        id:
+          type: string
+        fixture:
+          type: string
+        operation:
+          type: string
+          enum: [SOLVE, REPAIR]
+        zone:
+          type: string
+          description: IANA time zone of the fixture, for example `Europe/Istanbul`.
+        score:
+          $ref: '#/components/schemas/ScoreSummary'
+        assignments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Assignment'
+        unassigned:
+          type: array
+          description: Every empty seat, never silently dropped (FR8).
+          items:
+            $ref: '#/components/schemas/UnassignedSeat'
+        changes:
+          type: array
+          description: Seats that differ from the published roster (repair only; empty for solve).
+          items:
+            $ref: '#/components/schemas/Change'
+        pinnedSeatIds:
+          type: array
+          description: Seats that started before the sick call was reported (repair only).
+          items:
+            type: string
+    ScoreSummary:
+      type: object
+      required: [hard, medium, soft, feasible]
+      properties:
+        hard:
+          type: integer
+          format: int64
+          description: Hard score. 0 means no hard rule is broken.
+        medium:
+          type: integer
+          format: int64
+          description: Medium score (coverage). Negative means seats are empty.
+        soft:
+          type: integer
+          format: int64
+          description: Soft score (preferences, fairness, stability, contract hours).
+        feasible:
+          type: boolean
+          description: True when `hard` is 0.
+    Assignment:
+      type: object
+      required: [seatId, start, end, skill, employeeId]
+      properties:
+        seatId:
+          type: string
+        start:
+          type: string
+          format: date-time
+        end:
+          type: string
+          format: date-time
+        skill:
+          type: string
+        employeeId:
+          type: string
+    UnassignedSeat:
+      type: object
+      required: [seatId, start, end, skill, reasons]
+      properties:
+        seatId:
+          type: string
+        start:
+          type: string
+          format: date-time
+        end:
+          type: string
+          format: date-time
+        skill:
+          type: string
+        reasons:
+          type: array
+          description: One line per employee, `<employeeId>: <why not>`.
+          items:
+            type: string
+    Change:
+      type: object
+      required: [seatId, before, after, kind]
+      properties:
+        seatId:
+          type: string
+        before:
+          type: [string, 'null']
+          description: Published employee, null if the seat was published empty.
+        after:
+          type: [string, 'null']
+          description: Employee after the repair, null if the seat is now empty.
+        kind:
+          type: string
+          enum: [REASSIGNED, LEFT_EMPTY, FILLED]

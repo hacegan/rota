@@ -157,3 +157,63 @@ compiled and their tests passed. Local should move them to CONFIRMED in TIMEFOLD
   (`fixtures/sick/README.md`).
 - **H8 ROADMAP P05 was Ingestion.** It is now sick-call repair; ingestion is deferred, to be
   scheduled by Samet before P11 CLI.
+
+## P06 — REST API v1 (2026-11-25)
+
+No new Timefold API. The bootstrap adapter only calls the solver module's own public classes
+(`RosterSolver(Duration, Duration)`, `RosterSolver.solve`, `RosterRepairer(RosterSolver)`,
+`RosterRepairer.repair`, `SolveResult`, `RepairResult`), all proven by the green P03-P05 runs.
+
+### J. Spring Boot 4.1.2: UNVERIFIED (no sandbox build; confirm on the local run)
+
+- **J1 Jackson major version.** Boot 4 is expected to ship Jackson 3 (`tools.jackson.*`), not
+  Jackson 2 (`com.fasterxml.jackson.*`). Isolation:
+  - No code imports Jackson.
+  - The DTOs are plain records with String/long/boolean/List fields only.
+  - Times are pre-formatted ISO strings.
+  - Fixtures are parsed by `FixtureJson` (a copy of the test `MiniJson`), not by Jackson.
+
+  Assumption: Spring MVC serializes records via their accessors, and `null` fields are written as
+  JSON `null` (the default inclusion). If `changes[].before`/`after` nulls are omitted instead, the
+  contract (required, nullable) and a future LEFT_EMPTY test need adjusting; current tests do not
+  hit a null.
+- **J2 Starter name.** `bootstrap/pom.xml` uses `spring-boot-starter-webmvc` (the Boot 4 name). If
+  Maven cannot resolve it, the mechanical fix is `spring-boot-starter-web`. That is the same
+  dependency set, so local opencode may make that change.
+- **J3 Test setup.** `RosterApiTest` uses `@SpringBootTest` plus
+  `MockMvcBuilders.webAppContextSetup(WebApplicationContext)` from spring-test.
+  `@AutoConfigureMockMvc` is not used, because its package and module changed in Boot 4.
+
+  Assumptions:
+  - `spring-boot-starter-test` still brings spring-test, JUnit Jupiter, Hamcrest and json-path.
+  - `@SpringBootTest` with the default `webEnvironment` gives a `WebApplicationContext` when
+    webmvc is on the classpath.
+- **J4 JUnit version mix.** domain, solver and application pin `junit-jupiter` 6.1.3. bootstrap
+  takes JUnit from the Boot parent (`spring-boot-starter-test`). If surefire reports a JUnit
+  Platform version clash, the mechanical fix is to align bootstrap on 6.1.3.
+
+### K. P06 assumptions and decisions
+
+- **K1 ROADMAP P06 was "Scheduler v1 (greedy)".** It was replaced by the REST API because Timefold
+  already produces complete legal rosters. P07 "Scoring" and P08 "Search (beats greedy)" still
+  describe a hand-written engine and probably need re-scoping by Samet too. Not changed here.
+- **K2 Fixture reading is duplicated.** The main code has `bootstrap/FixtureFiles` + `FixtureJson`;
+  the tests have `solver/src/test/.../fixture/FixtureLoader` + `MiniJson`.
+  - Main code cannot use test classes.
+  - The test copy sits 8 folders deep, which the company sandbox's file bridge cannot stage, so it
+    was left untouched.
+  - The later ingestion phase (H8) should replace both copies with one production reader.
+- **K3 Fixture allowlist.** Solve accepts `mini` and `tight`; repair accepts `sick`. This is checked
+  in the use cases (`SolveRoster.FIXTURES`, `RepairSickCall.FIXTURES`). `FixtureFiles` also rejects
+  any name outside `[a-z0-9][a-z0-9-]*` and any path leaving `fixtures/`.
+- **K4 Fixtures folder.** `rota.fixtures-dir` if set. Otherwise the first `fixtures/` found walking
+  up from the working directory, which covers surefire in `bootstrap/` and the repo root.
+  `run-api.ps1` passes it explicitly.
+- **K5 Solve is synchronous.** A request blocks for the solver run: about 3-30 s, with the same
+  termination as the solver tests (PT30S spent, PT3S unimproved). An async job API is a later phase.
+- **K6 In-memory store.** Ids are `r1`, `r2`, … per process. Rosters are lost on restart; P13
+  adds persistence.
+- **K7 Status codes.** Solve and repair return **201 Created** with `Location: /api/rosters/{id}`.
+  Errors use a simple `{error, message}` body, not problem+json; problem+json stays in P14.
+- **K8 `feasible` = hard score 0.** Empty seats (medium < 0) do not make a roster infeasible.
+  Tight is "feasible" with 3 unassigned seats, which are listed with reasons.

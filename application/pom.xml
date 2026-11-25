@@ -12,13 +12,26 @@
 
   <artifactId>rota-application</artifactId>
   <name>rota-application</name>
-  <description>Application services</description>
+  <description>Application services: use cases and ports, pure Java (no Spring, no Timefold)</description>
 
   <dependencies>
     <dependency>
       <groupId>dev.rota</groupId>
       <artifactId>rota-domain</artifactId>
       <version>${project.version}</version>
+    </dependency>
+    <!-- Test versions as in domain/pom.xml (VERSIONS.md). -->
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>6.1.3</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.tngtech.archunit</groupId>
+      <artifactId>archunit</artifactId>
+      <version>1.5.1</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 </project>

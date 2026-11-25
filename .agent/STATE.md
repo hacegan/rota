@@ -4,10 +4,49 @@ Checkpoint file. Update after every meaningful step. Latest entry first.
 
 ## Current
 
-- **Phase:** P05 - Incremental sick-call repair
-- **Status:** DONE
+- **Phase:** P06 - REST API v1
+- **Status:** CODE_WRITTEN_UNVERIFIED
 - **Updated:** 2026-11-25
-- **Previous phase:** P04 - DONE (local verify green, 2026-11-25)
+- **Previous phase:** P05 - DONE (local verify green, 2026-11-25)
+
+## P06 code (company Claude sandbox, 2026-11-25)
+
+Status **CODE_WRITTEN_UNVERIFIED**. Written by the company Claude sandbox (write files only).
+Nothing was compiled, tested or run, and no git command was run. Verify has **not** been run;
+there is no verify output to record.
+
+Scope: a runnable REST API around the existing solver. Contract first in
+`docs/contracts/openapi/rota.yaml`. The application module holds pure-Java use cases
+(`SolveRoster`, `RepairSickCall`, `GetRoster`) and ports (`SchedulingPort`, `FixturePort`,
+`RosterRepository`), with no Spring and no Timefold. The bootstrap Spring Boot app wires them to
+`SolverSchedulingAdapter` (over `RosterSolver`/`RosterRepairer`), `InMemoryRosterRepository` and
+`FixtureFiles` (reads `fixtures/`).
+
+Endpoints:
+- `GET /api/health`
+- `POST /api/rosters/solve?fixture=mini|tight`
+- `POST /api/rosters/repair?fixture=sick`
+- `GET /api/rosters/{id}`
+
+Errors: unknown fixture or missing parameter returns 400; unknown id returns 404.
+
+Tests: MockMvc `RosterApiTest`, `FixtureFilesTest`, application `UseCasesTest`, and
+`ApplicationArchitectureTest` (no Spring, no Timefold).
+
+Scripts: `scripts/run-api.ps1`, and `scripts/verify_p06.ps1` registered as `p06`.
+
+ROADMAP P06 changed from "Scheduler v1 (greedy)" to this scope; the reason is recorded there.
+
+Not done: no DB, Docker, Kafka or Next.js. No solver behaviour change.
+
+Unverified Spring Boot 4 points (starter name, Jackson, test setup): `.agent/QUESTIONS.md` P06 §J.
+Details, risks and the file list: `.agent/HANDOFF.md`.
+
+Verify command for local Windows:
+
+```powershell
+pwsh -NoProfile -File scripts/verify.ps1 p06
+```
 
 ## P05 code (company Claude sandbox, 2026-11-25)
 
@@ -1061,9 +1100,26 @@ P05 verify passed.
 - `LICENSE`
 - P03 files: see `.agent/HANDOFF.md` history (P03 commit)
 - P04 files: see `.agent/HANDOFF.md` history (P04 commit)
-- P05 files: see `.agent/HANDOFF.md`
+- P05 files: see `.agent/HANDOFF.md` history (P05 commit)
+- P06 files: see `.agent/HANDOFF.md`
 
 ## Next action
 
 - **P05 DONE.** All five verifies exit 0. Sick-call repair (RosterRepairer, RepairResult,
   pinning, stability, sick fixture) implemented and tested; hard rules unchanged.
+- **P06 CODE_WRITTEN_UNVERIFIED.** Next: local verify on Windows, then record the real output here.
+  Run in order, each must exit 0:
+
+  ```powershell
+  git pull --rebase origin main
+  pwsh -NoProfile -File scripts/verify.ps1 p01
+  pwsh -NoProfile -File scripts/verify.ps1 p02
+  pwsh -NoProfile -File scripts/verify.ps1 p03
+  pwsh -NoProfile -File scripts/verify.ps1 p04
+  pwsh -NoProfile -File scripts/verify.ps1 p05
+  pwsh -NoProfile -File scripts/verify.ps1 p06
+  ```
+
+  Optional manual smoke test: `pwsh -NoProfile -File scripts/run-api.ps1`, then
+  `Invoke-RestMethod -Method Post 'http://localhost:8080/api/rosters/solve?fixture=mini'`.
+  Only the local machine marks P06 DONE.
