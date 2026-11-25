@@ -2,6 +2,7 @@ package dev.rota.solver;
 
 import dev.rota.domain.TimeRange;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -18,12 +19,28 @@ public final class PlanningEmployee {
     private final String id;
     private final Set<String> skills;
     private final int maxMinutesPerWeek;
+    private final int contractMinutesPerWeek;
+    private final int horizonWeeks;
+    private final Set<LocalDate> avoidDates;
     private final List<TimeRange> availability;
 
     public PlanningEmployee(String id, Set<String> skills, int maxMinutesPerWeek, List<TimeRange> availability) {
+        this(id, skills, maxMinutesPerWeek, 0, 1, Set.of(), availability);
+    }
+
+    /**
+     * @param contractMinutesPerWeek contracted minutes per week; 0 means no contract target (S4 off)
+     * @param horizonWeeks           ISO weeks covered by the planning horizon (S4 unused-contract penalty)
+     * @param avoidDates             site-zone dates the employee asked not to work (S1 AVOID)
+     */
+    public PlanningEmployee(String id, Set<String> skills, int maxMinutesPerWeek, int contractMinutesPerWeek,
+                            int horizonWeeks, Set<LocalDate> avoidDates, List<TimeRange> availability) {
         this.id = Objects.requireNonNull(id, "id");
         this.skills = Set.copyOf(skills);
         this.maxMinutesPerWeek = maxMinutesPerWeek;
+        this.contractMinutesPerWeek = contractMinutesPerWeek;
+        this.horizonWeeks = horizonWeeks;
+        this.avoidDates = Set.copyOf(avoidDates);
         this.availability = merge(availability);
     }
 
@@ -37,6 +54,19 @@ public final class PlanningEmployee {
 
     public int getMaxMinutesPerWeek() {
         return maxMinutesPerWeek;
+    }
+
+    public int getContractMinutesPerWeek() {
+        return contractMinutesPerWeek;
+    }
+
+    /** Contract minutes over the whole horizon: penalty when the employee gets no seat at all (S4). */
+    public int getContractMinutesForHorizon() {
+        return Math.multiplyExact(contractMinutesPerWeek, horizonWeeks);
+    }
+
+    public boolean avoids(LocalDate date) {
+        return date != null && avoidDates.contains(date);
     }
 
     /** Sorted, merged availability windows (overlapping or touching windows joined). */

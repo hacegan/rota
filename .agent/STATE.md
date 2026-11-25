@@ -4,9 +4,31 @@ Checkpoint file. Update after every meaningful step. Latest entry first.
 
 ## Current
 
-- **Phase:** P03 - Solver module (hard H1-H5 + coverage M6)
-- **Status:** DONE
+- **Phase:** P04 - Soft constraints and fairness (S1-S4)
+- **Status:** CODE_WRITTEN_UNVERIFIED
 - **Updated:** 2026-11-25
+- **Previous phase:** P03 - DONE (local verify green, 2026-11-25)
+
+## P04 code (company Claude sandbox, 2026-11-25)
+
+Status **CODE_WRITTEN_UNVERIFIED**. Written by the company Claude sandbox (write files only).
+Nothing was compiled, tested or run, and no git command was run. Verify has **not** been run;
+there is no verify output to record.
+
+Scope: S1 preferences (PREFER/AVOID from `preferences.json`), S2n night and S2w weekend
+fairness (own convex formula from CONSTRAINT-MODEL §4; `loadBalance` not used because its formula
+is UNVERIFIED), S3 stability against `previous-roster.json`, S4 contract-hours deviation. No
+incremental repair/pinning, DB, Docker, Spring or REST. ROADMAP P04 updated to this scope (reason
+recorded there). AGENTS.md: new "Who changes what" rule (Opus vs local opencode).
+
+Unverified Timefold API used, isolated to single constraint methods: `.agent/QUESTIONS.md` P04 §D.
+Assumptions to confirm: QUESTIONS.md P04 §F. Details, risks and the file list: `.agent/HANDOFF.md`.
+
+Verify command for local Windows:
+
+```powershell
+pwsh -NoProfile -File scripts/verify.ps1 p04
+```
 
 ## P03 code (company Claude sandbox, 2026-11-25)
 
@@ -701,6 +723,7 @@ P03 verify passed.
 | P01 | `pwsh -NoProfile -File scripts/verify_p01.ps1` | DONE — exit code 0, 4 OK / 0 WARN / 0 FAIL | 2026-11-19 |
 | P02 | `pwsh -NoProfile -File scripts/verify.ps1 p02` | DONE — exit code 0, 4 OK / 0 WARN / 0 FAIL | 2026-11-20 |
 | P03 | `pwsh -NoProfile -File scripts/verify.ps1 p03` | DONE - exit code 0, 4 OK / 0 WARN / 0 FAIL | 2026-11-25 |
+| P04 | `pwsh -NoProfile -File scripts/verify.ps1 p04` | CODE_WRITTEN_UNVERIFIED — not run | 2026-11-25 |
 
 ## Files changed
 
@@ -743,10 +766,15 @@ P03 verify passed.
 - `.gitignore`
 - `.gitattributes`
 - `LICENSE`
-- P03 files: see `.agent/HANDOFF.md`
+- P03 files: see `.agent/HANDOFF.md` history (P03 commit)
+- P04 files: see `.agent/HANDOFF.md`
 
 ## Next action
 
-- **P03 DONE.** All three verifies exit 0. Mini feasible (14/14 seats, 0 hard); tight infeasible by
-  design (0 hard, 3 unassigned with reasons). Assertions run as JUnit on any OS; verify_p03 is
-  build + tests + ArchUnit only. F1 resolved (see `.agent/QUESTIONS.md`).
+- **P04 CODE_WRITTEN_UNVERIFIED.** Not DONE.
+- **Company Windows PowerShell:** review, then commit and push the P04 files (list in
+  `.agent/HANDOFF.md`).
+- **Local Windows:** `git pull --rebase origin main`, then
+  `pwsh -NoProfile -File scripts/verify.ps1 p03` and `pwsh -NoProfile -File scripts/verify.ps1 p04`;
+  record the exact output and exit codes here. Mechanical compile fixes only (AGENTS.md "Who
+  changes what"); semantic problems go back to Opus. Mark P04 DONE only if `verify p04` exits 0.

@@ -19,7 +19,7 @@ verify command, and is checkpointed in `.agent/STATE.md`.
 | P01 | Domain & requirements | Glossary, entities, constraint taxonomy, sample data | Fixtures parse; glossary reviewed |
 | P02 | Stack & skeleton | Pick stack, project files, build + test commands | Clean build and empty test run pass |
 | P03 | Core domain model | Entities, value objects, invariants | Unit tests pass |
-| P04 | Constraints engine | Hard/soft rules, weights, evaluator | Rule tests detect seeded violations |
+| P04 | Soft constraints & fairness | S1 preferences, S2n/S2w night/weekend fairness, S3 stability, S4 contract hours | `pwsh -NoProfile -File scripts/verify.ps1 p04` exits 0 |
 | P05 | Ingestion | Parse JSON/CSV employees, shifts, availability | Fixture parse tests pass |
 | P06 | Scheduler v1 | Greedy assignment | Mini fixture fully assigned, 0 hard violations |
 | P07 | Scoring | Penalty/cost function | Score improves on known cases |
@@ -124,22 +124,36 @@ Expected: domain unit tests pass, including invariant rejection cases.
 
 ---
 
-## P04 — Constraints engine
+## P04 — Soft constraints & fairness
 
-**Goal:** Rule model that every later phase reuses.
+**Goal:** Quality rules on top of the P03 hard rules and coverage, in the Timefold `solver` module.
+
+**Scope changed 2026-11-25 (Samet).** The original P04 was "Constraints engine: constraint
+interface `Evaluate(schedule) -> violations`, initial hard rule set". P03 already delivered the hard
+rules (H1-H5) and coverage (M6) as Timefold constraints with ConstraintVerifier tests, and
+Timefold is the binding constraint engine (STACK.md), so a hand-written evaluator would duplicate
+it. P04 therefore covers the soft rules. No incremental repair or pinning, no DB, Docker, Spring
+or REST.
 
 **Deliverables**
 
-- Constraint interface: `Evaluate(schedule) -> violations`, hard vs soft, weight.
-- Initial rule set: qualification, max hours, rest between shifts, no overlap, availability.
+- S1 preferences: PREFER / AVOID dates from `preferences.json`.
+- S2n night fairness and S2w weekend fairness (D3 definitions; convex formula from
+  CONSTRAINT-MODEL §4, not `loadBalance`).
+- S3 stability: penalize changes from `previous-roster.json`.
+- S4 contract-hours deviation (`contract_hours_per_week`, D4).
+- ConstraintVerifier test per soft rule; solver tests showing balanced beats skewed, preferred beats
+  avoided when hard rules allow, contract deviation is penalized, and changing the previous roster
+  costs a stability penalty.
+- `scripts/verify_p04.ps1`: build + tests + ArchUnit.
 
 **Verify**
 
 ```powershell
-pwsh -File scripts/test.ps1
+pwsh -NoProfile -File scripts/verify.ps1 p04
 ```
 
-Expected: each rule detects a seeded violation and accepts a valid schedule.
+Expected: exit code 0; all P03 and P04 tests pass; ArchUnit rules hold.
 
 ---
 

@@ -1,6 +1,8 @@
 package dev.rota.solver.fixture;
 
 import dev.rota.domain.Employee;
+import dev.rota.domain.Preference;
+import dev.rota.domain.PreviousAssignment;
 import dev.rota.domain.SchedulingProblem;
 import dev.rota.domain.Shift;
 import dev.rota.domain.TimeRange;
@@ -25,11 +27,14 @@ import java.util.Map;
 /**
  * Test-only fixture reader (P05 owns real ingestion). Reads both fixture formats:
  * <ul>
- *   <li>mini: {@code timezone} field, availability as ISO offset datetimes (D3)</li>
- *   <li>tight (kept unchanged, D1): no timezone, availability as {@code day + HH:mm}</li>
+ *   <li>mini: {@code timezone} field, availability as ISO offset datetimes (D3), optional
+ *       {@code contract_hours_per_week}, {@code preferences.json}, {@code previous-roster.json} (D4)</li>
+ *   <li>tight (kept unchanged, D1): no timezone, availability as {@code day + HH:mm}, no contract
+ *       hours, no preferences, no previous roster</li>
  * </ul>
- * Missing timezone defaults to Europe/Istanbul (D3: fixtures use Europe/Istanbul).
- * A local end time not after its start time is taken as the next day.
+ * Missing timezone defaults to Europe/Istanbul (D3: fixtures use Europe/Istanbul). Missing
+ * contract hours default to 0 (no contract target). A local end time not after its start time is
+ * taken as the next day.
  */
 public final class FixtureLoader {
 
@@ -77,11 +82,14 @@ public final class FixtureLoader {
                 skills.add((String) skill);
             }
             int maxHours = ((BigDecimal) entry.get("max_hours_per_week")).intValueExact();
+            Object contract = entry.get("contract_hours_per_week");
+            int contractHours = contract == null ? 0 : ((BigDecimal) contract).intValueExact();
             employees.add(new Employee(id, (String) entry.get("name"), new HashSet<>(skills), maxHours,
-                    availability.getOrDefault(id, List.of())));
+                    contractHours, availability.getOrDefault(id, List.of())));
         }
 
-        return new SchedulingProblem(zone, employees, shifts(dir.resolve("shifts.csv"), zone));
+        return new SchedulingProblem(zone, employees, shifts(dir.resolve("shifts.csv"), zone),
+                preferences(dir.resolve("preferences.json")), previousRoster(dir.resolve("previous-roster.json")));
     }
 
     private static ZoneId zone(Map<String, Object> employeesJson, Map<String, Object> availabilityJson) {
@@ -96,6 +104,40 @@ public final class FixtureLoader {
         }
         return new TimeRange(OffsetDateTime.parse((String) entry.get("start")).toInstant(),
                 OffsetDateTime.parse((String) entry.get("end")).toInstant());
+    }
+
+    /** {@code {"preferences":[{"employee_id","kind":"PREFER|AVOID","target":"yyyy-MM-dd"}]}}; missing file = none. */
+    @SuppressWarnings("unchecked")
+    private static List<Preference> preferences(Path file) {
+        List<Preference> preferences = new ArrayList<>();
+        if (!Files.isRegularFile(file)) {
+            return preferences;
+        }
+        Map<String, Object> json = (Map<String, Object>) MiniJson.parse(read(file));
+        for (Object item : (List<Object>) json.get("preferences")) {
+            Map<String, Object> entry = (Map<String, Object>) item;
+            preferences.add(new Preference((String) entry.get("employee_id"),
+                    Preference.Kind.valueOf((String) entry.get("kind")),
+                    LocalDate.parse((String) entry.get("target"))));
+        }
+        return preferences;
+    }
+
+    /** {@code {"previous_roster":{"assignments":[{"shift_id","employee_id","pinned"}]}}}; missing file = none. */
+    @SuppressWarnings("unchecked")
+    private static List<PreviousAssignment> previousRoster(Path file) {
+        List<PreviousAssignment> assignments = new ArrayList<>();
+        if (!Files.isRegularFile(file)) {
+            return assignments;
+        }
+        Map<String, Object> json = (Map<String, Object>) MiniJson.parse(read(file));
+        Map<String, Object> roster = (Map<String, Object>) json.get("previous_roster");
+        for (Object item : (List<Object>) roster.get("assignments")) {
+            Map<String, Object> entry = (Map<String, Object>) item;
+            assignments.add(new PreviousAssignment((String) entry.get("shift_id"),
+                    (String) entry.get("employee_id"), Boolean.TRUE.equals(entry.get("pinned"))));
+        }
+        return assignments;
     }
 
     private static List<Shift> shifts(Path csv, ZoneId zone) {

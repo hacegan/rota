@@ -57,6 +57,16 @@ Only local Windows runs verify and marks a phase DONE. A Claude session in the L
 follows the sandbox row even though it reads the company `.agent/MACHINE.md` through the bridge;
 Samet states the sandbox role in the session.
 
+## Who changes what
+
+- **Opus (Claude) writes most code**: domain, constraints, solver, tests, fixtures, scripts, docs.
+- **Local opencode may only make minimal mechanical fixes** so an Opus change builds and runs:
+  compile errors, type mismatches, missing or wrong imports, and script plumbing (paths, flags,
+  dispatcher entries). The fix must not change what the code means.
+- **Semantic changes require Opus**: anything that changes domain rules, constraint logic or
+  weights, penalty shapes, test expectations, or fixture data. If a mechanical fix would need one
+  of these, opencode stops, records the problem in `.agent/STATE.md`, and hands back to Opus.
+
 ## Company sandbox environment (read-only)
 
 - The company Claude sandbox is a Linux container with **Java 11** and **no PowerShell** (`pwsh`).

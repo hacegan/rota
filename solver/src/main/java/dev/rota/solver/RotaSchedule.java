@@ -7,14 +7,15 @@ import ai.timefold.solver.core.api.domain.solution.ProblemFactCollectionProperty
 import ai.timefold.solver.core.api.domain.valuerange.ValueRangeProvider;
 import ai.timefold.solver.core.api.score.HardMediumSoftScore;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Planning solution: employees (facts + value range for {@link ShiftSeat#getEmployee()}) and
- * seats (entities). Score = HardMediumSoftScore (D2).
+ * Planning solution: employees (facts + value range for {@link ShiftSeat#getEmployee()}),
+ * PREFER preferences (facts, S1) and seats (entities). Score = HardMediumSoftScore (D2).
  *
- * <p>The value range is linked to the planning variable by type, without ids. UNVERIFIED (see
- * .agent/QUESTIONS.md, A8).
+ * <p>The value range is linked to the planning variable by type, without ids (proven by the
+ * green P03 local run).
  */
 @PlanningSolution
 public class RotaSchedule {
@@ -22,6 +23,9 @@ public class RotaSchedule {
     @ProblemFactCollectionProperty
     @ValueRangeProvider
     private List<PlanningEmployee> employees;
+
+    @ProblemFactCollectionProperty
+    private List<PlanningPreference> preferences;
 
     @PlanningEntityCollectionProperty
     private List<ShiftSeat> seats;
@@ -33,8 +37,13 @@ public class RotaSchedule {
     }
 
     public RotaSchedule(List<PlanningEmployee> employees, List<ShiftSeat> seats) {
+        this(employees, seats, new ArrayList<>());
+    }
+
+    public RotaSchedule(List<PlanningEmployee> employees, List<ShiftSeat> seats, List<PlanningPreference> preferences) {
         this.employees = employees;
         this.seats = seats;
+        this.preferences = preferences;
     }
 
     public List<PlanningEmployee> getEmployees() {
@@ -43,6 +52,14 @@ public class RotaSchedule {
 
     public void setEmployees(List<PlanningEmployee> employees) {
         this.employees = employees;
+    }
+
+    public List<PlanningPreference> getPreferences() {
+        return preferences;
+    }
+
+    public void setPreferences(List<PlanningPreference> preferences) {
+        this.preferences = preferences;
     }
 
     public List<ShiftSeat> getSeats() {
