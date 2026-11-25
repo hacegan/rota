@@ -5,7 +5,7 @@ Checkpoint file. Update after every meaningful step. Latest entry first.
 ## Current
 
 - **Phase:** P05 - Incremental sick-call repair
-- **Status:** CODE_WRITTEN_UNVERIFIED
+- **Status:** DONE
 - **Updated:** 2026-11-25
 - **Previous phase:** P04 - DONE (local verify green, 2026-11-25)
 
@@ -856,6 +856,157 @@ P04 verify: 4 OK, 0 WARN, 0 FAIL
 P04 verify passed.
 ```
 
+## Local verify (green, 2026-11-25, P05)
+
+Phase: P05. Machine role: local. All five exit 0. P05 marked DONE.
+
+### p01 - exit code 0
+
+```text
+Rota P01 verify
+Repository: C:\dev\rota
+
+OK    glossary           all 8 terms present
+OK    requirements       3166 bytes
+OK    fixtures           6 files
+OK    json-parse         4 JSON files parsed
+
+P01 verify: 4 OK, 0 WARN, 0 FAIL
+P01 verify passed.
+```
+
+### p02 - exit code 0
+
+```text
+JAVA_HOME: C:\Users\samet\AppData\Local\Programs\Eclipse Adoptium\jdk-27.0.1.0-hotspot
+openjdk version "27.0.1.0.2" 2026-10-21
+OpenJDK Runtime Environment Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1)
+OpenJDK 64-Bit Server VM Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1, mixed mode, sharing)
+Rota P02 verify
+Repository: C:\dev\rota
+
+OK    layout             aggregator + domain, application, bootstrap
+JAVA_HOME: C:\Users\samet\AppData\Local\Programs\Eclipse Adoptium\jdk-27.0.1.0-hotspot
+openjdk version "27.0.1.0.2" 2026-10-21
+OpenJDK Runtime Environment Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1)
+OpenJDK 64-Bit Server VM Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1, mixed mode, sharing)
+OK    build              mvnw -q -DskipTests package
+JAVA_HOME: C:\Users\samet\AppData\Local\Programs\Eclipse Adoptium\jdk-27.0.1.0-hotspot
+openjdk version "27.0.1.0.2" 2026-10-21
+OpenJDK Runtime Environment Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1)
+OpenJDK 64-Bit Server VM Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1, mixed mode, sharing)
+SLF4J(W): No SLF4J providers were found.
+SLF4J(W): Defaulting to no-operation (NOP) logger implementation
+SLF4J(W): See https://www.slf4j.org/codes.html#noProviders for further details.
+SLF4J(W): No SLF4J providers were found.
+SLF4J(W): Defaulting to no-operation (NOP) logger implementation
+SLF4J(W): See https://www.slf4j.org/codes.html#noProviders for further details.
+OK    test               mvnw -q test
+OK    archunit           domain does not depend on Spring
+
+P02 verify: 4 OK, 0 WARN, 0 FAIL
+P02 verify passed.
+```
+
+### p03 - exit code 0
+
+```text
+JAVA_HOME: C:\Users\samet\AppData\Local\Programs\Eclipse Adoptium\jdk-27.0.1.0-hotspot
+openjdk version "27.0.1.0.2" 2026-10-21
+OpenJDK Runtime Environment Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1)
+OpenJDK 64-Bit Server VM Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1, mixed mode, sharing)
+Rota P03 verify
+Repository: C:\dev\rota
+
+OK    layout             domain, solver, application, bootstrap; no Timefold in domain pom
+JAVA_HOME: C:\Users\samet\AppData\Local\Programs\Eclipse Adoptium\jdk-27.0.1.0-hotspot
+openjdk version "27.0.1.0.2" 2026-10-21
+OpenJDK Runtime Environment Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1)
+OpenJDK 64-Bit Server VM Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1, mixed mode, sharing)
+OK    build              mvnw -q -DskipTests package
+JAVA_HOME: C:\Users\samet\AppData\Local\Programs\Eclipse Adoptium\jdk-27.0.1.0-hotspot
+openjdk version "27.0.1.0.2" 2026-10-21
+OpenJDK Runtime Environment Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1)
+OpenJDK 64-Bit Server VM Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1, mixed mode, sharing)
+SLF4J(W): No SLF4J providers were found.
+SLF4J(W): Defaulting to no-operation (NOP) logger implementation
+SLF4J(W): See https://www.slf4j.org/codes.html#noProviders for further details.
+SLF4J(W): No SLF4J providers were found.
+SLF4J(W): Defaulting to no-operation (NOP) logger implementation
+SLF4J(W): See https://www.slf4j.org/codes.html#noProviders for further details.
+OK    test               mvnw -q test
+OK    archunit           domain does not depend on Spring or Timefold
+
+P03 verify: 4 OK, 0 WARN, 0 FAIL
+P03 verify passed.
+```
+
+### p04 - exit code 0
+
+```text
+JAVA_HOME: C:\Users\samet\AppData\Local\Programs\Eclipse Adoptium\jdk-27.0.1.0-hotspot
+openjdk version "27.0.1.0.2" 2026-10-21
+OpenJDK Runtime Environment Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1)
+OpenJDK 64-Bit Server VM Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1, mixed mode, sharing)
+Rota P04 verify
+Repository: C:\dev\rota
+
+OK    layout             domain, solver, application, bootstrap; no Timefold in domain pom
+JAVA_HOME: C:\Users\samet\AppData\Local\Programs\Eclipse Adoptium\jdk-27.0.1.0-hotspot
+openjdk version "27.0.1.0.2" 2026-10-21
+OpenJDK Runtime Environment Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1)
+OpenJDK 64-Bit Server VM Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1, mixed mode, sharing)
+OK    build              mvnw -q -DskipTests package
+JAVA_HOME: C:\Users\samet\AppData\Local\Programs\Eclipse Adoptium\jdk-27.0.1.0-hotspot
+openjdk version "27.0.1.0.2" 2026-10-21
+OpenJDK Runtime Environment Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1)
+OpenJDK 64-Bit Server VM Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1, mixed mode, sharing)
+SLF4J(W): No SLF4J providers were found.
+SLF4J(W): Defaulting to no-operation (NOP) logger implementation
+SLF4J(W): See https://www.slf4j.org/codes.html#noProviders for further details.
+SLF4J(W): No SLF4J providers were found.
+SLF4J(W): Defaulting to no-operation (NOP) logger implementation
+SLF4J(W): See https://www.slf4j.org/codes.html#noProviders for further details.
+OK    test               mvnw -q test
+OK    archunit           domain does not depend on Spring or Timefold
+
+P04 verify: 4 OK, 0 WARN, 0 FAIL
+P04 verify passed.
+```
+
+### p05 - exit code 0
+
+```text
+JAVA_HOME: C:\Users\samet\AppData\Local\Programs\Eclipse Adoptium\jdk-27.0.1.0-hotspot
+openjdk version "27.0.1.0.2" 2026-10-21
+OpenJDK Runtime Environment Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1)
+OpenJDK 64-Bit Server VM Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1, mixed mode, sharing)
+Rota P05 verify
+Repository: C:\dev\rota
+
+OK    layout             domain, solver, application, bootstrap; no Timefold in domain pom
+JAVA_HOME: C:\Users\samet\AppData\Local\Programs\Eclipse Adoptium\jdk-27.0.1.0-hotspot
+openjdk version "27.0.1.0.2" 2026-10-21
+OpenJDK Runtime Environment Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1)
+OpenJDK 64-Bit Server VM Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1, mixed mode, sharing)
+OK    build              mvnw -q -DskipTests package
+JAVA_HOME: C:\Users\samet\AppData\Local\Programs\Eclipse Adoptium\jdk-27.0.1.0-hotspot
+openjdk version "27.0.1.0.2" 2026-10-21
+OpenJDK Runtime Environment Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1)
+OpenJDK 64-Bit Server VM Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1, mixed mode, sharing)
+SLF4J(W): No SLF4J providers were found.
+SLF4J(W): Defaulting to no-operation (NOP) logger implementation
+SLF4J(W): See https://www.slf4j.org/codes.html#noProviders for further details.
+SLF4J(W): No SLF4J providers were found.
+SLF4J(W): Defaulting to no-operation (NOP) logger implementation
+SLF4J(W): See https://www.slf4j.org/codes.html#noProviders for further details.
+OK    test               mvnw -q test
+OK    archunit           domain does not depend on Spring or Timefold
+
+P05 verify: 4 OK, 0 WARN, 0 FAIL
+P05 verify passed.
+```
+
 ## Verify log
 
 | Phase | Command | Result | Date |
@@ -865,7 +1016,7 @@ P04 verify passed.
 | P02 | `pwsh -NoProfile -File scripts/verify.ps1 p02` | DONE — exit code 0, 4 OK / 0 WARN / 0 FAIL | 2026-11-20 |
 | P03 | `pwsh -NoProfile -File scripts/verify.ps1 p03` | DONE - exit code 0, 4 OK / 0 WARN / 0 FAIL | 2026-11-25 |
 | P04 | `pwsh -NoProfile -File scripts/verify.ps1 p04` | DONE - exit code 0, 4 OK / 0 WARN / 0 FAIL | 2026-11-25 |
-| P05 | `pwsh -NoProfile -File scripts/verify.ps1 p05` | CODE_WRITTEN_UNVERIFIED — not run | 2026-11-25 |
+| P05 | `pwsh -NoProfile -File scripts/verify.ps1 p05` | DONE - exit code 0, 4 OK / 0 WARN / 0 FAIL | 2026-11-25 |
 
 ## Files changed
 
@@ -914,10 +1065,5 @@ P04 verify passed.
 
 ## Next action
 
-- **P05 CODE_WRITTEN_UNVERIFIED.** Not DONE. (P04 DONE: all four verifies exit 0.)
-- **Company Windows PowerShell:** review, then commit and push the P05 files (list in
-  `.agent/HANDOFF.md`).
-- **Local Windows:** `git pull --rebase origin main`, then
-  `pwsh -NoProfile -File scripts/verify.ps1 p04` and `pwsh -NoProfile -File scripts/verify.ps1 p05`;
-  record the exact output and exit codes here. Mechanical compile fixes only (AGENTS.md "Who
-  changes what"); semantic problems go back to Opus. Mark P05 DONE only if `verify p05` exits 0.
+- **P05 DONE.** All five verifies exit 0. Sick-call repair (RosterRepairer, RepairResult,
+  pinning, stability, sick fixture) implemented and tested; hard rules unchanged.
