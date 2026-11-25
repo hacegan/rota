@@ -4,8 +4,8 @@ Checkpoint file. Update after every meaningful step. Latest entry first.
 
 ## Current
 
-- **Phase:** P03 — Solver module (hard H1-H5 + coverage M6)
-- **Status:** CODE_WRITTEN_UNVERIFIED
+- **Phase:** P03 - Solver module (hard H1-H5 + coverage M6)
+- **Status:** BLOCKED (verify failed; see Local verify 2026-11-25)
 - **Updated:** 2026-11-25
 
 ## P03 code (company Claude sandbox, 2026-11-25)
@@ -321,6 +321,293 @@ P02 verify: 4 OK, 0 WARN, 0 FAIL
 P02 verify passed.
 ```
 
+## Local verify (2026-11-25)
+
+Phase: P03. Machine role: local. Commands run in order. p01 exit 0; p02 exit 1; p03 exit 1.
+
+### p01 - exit code 0
+
+```text
+Rota P01 verify
+Repository: C:\dev\rota
+
+OK    glossary           all 8 terms present
+OK    requirements       3166 bytes
+OK    fixtures           5 files
+OK    json-parse         4 JSON files parsed
+
+P01 verify: 4 OK, 0 WARN, 0 FAIL
+P01 verify passed.
+```
+
+### p02 - exit code 1 (FAILED)
+
+```text
+JAVA_HOME: C:\Users\samet\AppData\Local\Programs\Eclipse Adoptium\jdk-27.0.1.0-hotspot
+openjdk version "27.0.1.0.2" 2026-10-21
+OpenJDK Runtime Environment Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1)
+OpenJDK 64-Bit Server VM Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1, mixed mode, sharing)
+Rota P02 verify
+Repository: C:\dev\rota
+
+OK    layout             aggregator + domain, application, bootstrap
+JAVA_HOME: C:\Users\samet\AppData\Local\Programs\Eclipse Adoptium\jdk-27.0.1.0-hotspot
+openjdk version "27.0.1.0.2" 2026-10-21
+OpenJDK Runtime Environment Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1)
+OpenJDK 64-Bit Server VM Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1, mixed mode, sharing)
+OK    build              mvnw -q -DskipTests package
+JAVA_HOME: C:\Users\samet\AppData\Local\Programs\Eclipse Adoptium\jdk-27.0.1.0-hotspot
+openjdk version "27.0.1.0.2" 2026-10-21
+OpenJDK Runtime Environment Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1)
+OpenJDK 64-Bit Server VM Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1, mixed mode, sharing)
+SLF4J(W): No SLF4J providers were found.
+SLF4J(W): Defaulting to no-operation (NOP) logger implementation
+SLF4J(W): See https://www.slf4j.org/codes.html#noProviders for further details.
+SLF4J(W): No SLF4J providers were found.
+SLF4J(W): Defaulting to no-operation (NOP) logger implementation
+SLF4J(W): See https://www.slf4j.org/codes.html#noProviders for further details.
+[ERROR] Tests run: 1, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 4.022 s <<< FAILURE! -- in dev.rota.solver.MiniFixtureSolveTest
+[ERROR] dev.rota.solver.MiniFixtureSolveTest.everySeatAssignedWithZeroHard -- Time elapsed: 3.992 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: 
+unassigned seats
+fixture: mini
+zone: Europe/Istanbul
+score: 0hard/-360medium/0soft
+hard: 0
+medium: -360
+seats: 14
+assigned: 13
+unassigned: 1
+ASSIGNED S01#0 2026-11-23 08:00-14:00 barista -> E1
+ASSIGNED S02#0 2026-11-23 14:00-20:00 cashier -> E2
+ASSIGNED S03#0 2026-11-24 08:00-14:00 barista -> E1
+ASSIGNED S04#0 2026-11-24 14:00-20:00 cashier -> E2
+ASSIGNED S05#0 2026-11-25 08:00-14:00 barista -> E1
+ASSIGNED S06#0 2026-11-25 14:00-20:00 cashier -> E2
+ASSIGNED S07#0 2026-11-26 08:00-14:00 barista -> E1
+ASSIGNED S08#0 2026-11-26 14:00-20:00 cashier -> E2
+ASSIGNED S09#0 2026-11-27 08:00-14:00 barista -> E1
+ASSIGNED S10#0 2026-11-27 14:00-20:00 cashier -> E2
+ASSIGNED S11#0 2026-11-28 08:00-14:00 barista -> E1
+ASSIGNED S12#0 2026-11-28 14:00-20:00 cashier -> E3
+ASSIGNED S13#0 2026-11-29 08:00-14:00 barista -> E3
+UNASSIGNED S14#0 2026-11-29 14:00-20:00 cashier | E1: week total would be 42h > max 40h; E2: not available for 360 of 360 min, week total would be 36h > max 30h; E3: rest 0h next to S13#0 (min 11h)
+ ==> expected: <0> but was: <1>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:158)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:139)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:201)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:152)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:590)
+	at dev.rota.solver.MiniFixtureSolveTest.everySeatAssignedWithZeroHard(MiniFixtureSolveTest.java:23)
+
+[ERROR] Failures: 
+[ERROR]   MiniFixtureSolveTest.everySeatAssignedWithZeroHard:23 unassigned seats
+fixture: mini
+zone: Europe/Istanbul
+score: 0hard/-360medium/0soft
+hard: 0
+medium: -360
+seats: 14
+assigned: 13
+unassigned: 1
+ASSIGNED S01#0 2026-11-23 08:00-14:00 barista -> E1
+ASSIGNED S02#0 2026-11-23 14:00-20:00 cashier -> E2
+ASSIGNED S03#0 2026-11-24 08:00-14:00 barista -> E1
+ASSIGNED S04#0 2026-11-24 14:00-20:00 cashier -> E2
+ASSIGNED S05#0 2026-11-25 08:00-14:00 barista -> E1
+ASSIGNED S06#0 2026-11-25 14:00-20:00 cashier -> E2
+ASSIGNED S07#0 2026-11-26 08:00-14:00 barista -> E1
+ASSIGNED S08#0 2026-11-26 14:00-20:00 cashier -> E2
+ASSIGNED S09#0 2026-11-27 08:00-14:00 barista -> E1
+ASSIGNED S10#0 2026-11-27 14:00-20:00 cashier -> E2
+ASSIGNED S11#0 2026-11-28 08:00-14:00 barista -> E1
+ASSIGNED S12#0 2026-11-28 14:00-20:00 cashier -> E3
+ASSIGNED S13#0 2026-11-29 08:00-14:00 barista -> E3
+UNASSIGNED S14#0 2026-11-29 14:00-20:00 cashier | E1: week total would be 42h > max 40h; E2: not available for 360 of 360 min, week total would be 36h > max 30h; E3: rest 0h next to S13#0 (min 11h)
+ ==> expected: <0> but was: <1>
+[ERROR] Tests run: 17, Failures: 1, Errors: 0, Skipped: 0
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:3.5.6:test (default-test) on project rota-solver: There are test failures.
+[ERROR] 
+[ERROR] See C:\dev\rota\solver\target\surefire-reports for the individual test results.
+[ERROR] See dump files (if any exist) [date].dump, [date]-jvmRun[N].dump and [date].dumpstream.
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
+[ERROR] 
+[ERROR] After correcting the problems, you can resume the build with the command
+[ERROR]   mvn <args> -rf :rota-solver
+FAIL  test               exit 1
+OK    archunit           domain does not depend on Spring
+
+P02 verify: 3 OK, 0 WARN, 1 FAIL
+P02 verify FAILED.
+```
+
+### p03 - exit code 1 (FAILED)
+
+```text
+JAVA_HOME: C:\Users\samet\AppData\Local\Programs\Eclipse Adoptium\jdk-27.0.1.0-hotspot
+openjdk version "27.0.1.0.2" 2026-10-21
+OpenJDK Runtime Environment Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1)
+OpenJDK 64-Bit Server VM Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1, mixed mode, sharing)
+Rota P03 verify
+Repository: C:\dev\rota
+
+OK    layout             domain, solver, application, bootstrap; no Timefold in domain pom
+JAVA_HOME: C:\Users\samet\AppData\Local\Programs\Eclipse Adoptium\jdk-27.0.1.0-hotspot
+openjdk version "27.0.1.0.2" 2026-10-21
+OpenJDK Runtime Environment Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1)
+OpenJDK 64-Bit Server VM Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1, mixed mode, sharing)
+OK    build              mvnw -q -DskipTests package
+JAVA_HOME: C:\Users\samet\AppData\Local\Programs\Eclipse Adoptium\jdk-27.0.1.0-hotspot
+openjdk version "27.0.1.0.2" 2026-10-21
+OpenJDK Runtime Environment Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1)
+OpenJDK 64-Bit Server VM Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1, mixed mode, sharing)
+SLF4J(W): No SLF4J providers were found.
+SLF4J(W): Defaulting to no-operation (NOP) logger implementation
+SLF4J(W): See https://www.slf4j.org/codes.html#noProviders for further details.
+SLF4J(W): No SLF4J providers were found.
+SLF4J(W): Defaulting to no-operation (NOP) logger implementation
+SLF4J(W): See https://www.slf4j.org/codes.html#noProviders for further details.
+[ERROR] Tests run: 1, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 3.844 s <<< FAILURE! -- in dev.rota.solver.MiniFixtureSolveTest
+[ERROR] dev.rota.solver.MiniFixtureSolveTest.everySeatAssignedWithZeroHard -- Time elapsed: 3.812 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: 
+unassigned seats
+fixture: mini
+zone: Europe/Istanbul
+score: 0hard/-360medium/0soft
+hard: 0
+medium: -360
+seats: 14
+assigned: 13
+unassigned: 1
+ASSIGNED S01#0 2026-11-23 08:00-14:00 barista -> E1
+ASSIGNED S02#0 2026-11-23 14:00-20:00 cashier -> E2
+ASSIGNED S03#0 2026-11-24 08:00-14:00 barista -> E1
+ASSIGNED S04#0 2026-11-24 14:00-20:00 cashier -> E2
+ASSIGNED S05#0 2026-11-25 08:00-14:00 barista -> E1
+ASSIGNED S06#0 2026-11-25 14:00-20:00 cashier -> E2
+ASSIGNED S07#0 2026-11-26 08:00-14:00 barista -> E1
+ASSIGNED S08#0 2026-11-26 14:00-20:00 cashier -> E2
+ASSIGNED S09#0 2026-11-27 08:00-14:00 barista -> E1
+ASSIGNED S10#0 2026-11-27 14:00-20:00 cashier -> E2
+ASSIGNED S11#0 2026-11-28 08:00-14:00 barista -> E1
+ASSIGNED S12#0 2026-11-28 14:00-20:00 cashier -> E3
+ASSIGNED S13#0 2026-11-29 08:00-14:00 barista -> E3
+UNASSIGNED S14#0 2026-11-29 14:00-20:00 cashier | E1: week total would be 42h > max 40h; E2: not available for 360 of 360 min, week total would be 36h > max 30h; E3: rest 0h next to S13#0 (min 11h)
+ ==> expected: <0> but was: <1>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:158)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:139)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:201)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:152)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:590)
+	at dev.rota.solver.MiniFixtureSolveTest.everySeatAssignedWithZeroHard(MiniFixtureSolveTest.java:23)
+
+[ERROR] Failures: 
+[ERROR]   MiniFixtureSolveTest.everySeatAssignedWithZeroHard:23 unassigned seats
+fixture: mini
+zone: Europe/Istanbul
+score: 0hard/-360medium/0soft
+hard: 0
+medium: -360
+seats: 14
+assigned: 13
+unassigned: 1
+ASSIGNED S01#0 2026-11-23 08:00-14:00 barista -> E1
+ASSIGNED S02#0 2026-11-23 14:00-20:00 cashier -> E2
+ASSIGNED S03#0 2026-11-24 08:00-14:00 barista -> E1
+ASSIGNED S04#0 2026-11-24 14:00-20:00 cashier -> E2
+ASSIGNED S05#0 2026-11-25 08:00-14:00 barista -> E1
+ASSIGNED S06#0 2026-11-25 14:00-20:00 cashier -> E2
+ASSIGNED S07#0 2026-11-26 08:00-14:00 barista -> E1
+ASSIGNED S08#0 2026-11-26 14:00-20:00 cashier -> E2
+ASSIGNED S09#0 2026-11-27 08:00-14:00 barista -> E1
+ASSIGNED S10#0 2026-11-27 14:00-20:00 cashier -> E2
+ASSIGNED S11#0 2026-11-28 08:00-14:00 barista -> E1
+ASSIGNED S12#0 2026-11-28 14:00-20:00 cashier -> E3
+ASSIGNED S13#0 2026-11-29 08:00-14:00 barista -> E3
+UNASSIGNED S14#0 2026-11-29 14:00-20:00 cashier | E1: week total would be 42h > max 40h; E2: not available for 360 of 360 min, week total would be 36h > max 30h; E3: rest 0h next to S13#0 (min 11h)
+ ==> expected: <0> but was: <1>
+[ERROR] Tests run: 17, Failures: 1, Errors: 0, Skipped: 0
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:3.5.6:test (default-test) on project rota-solver: There are test failures.
+[ERROR] 
+[ERROR] See C:\dev\rota\solver\target\surefire-reports for the individual test results.
+[ERROR] See dump files (if any exist) [date].dump, [date]-jvmRun[N].dump and [date].dumpstream.
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
+[ERROR] 
+[ERROR] After correcting the problems, you can resume the build with the command
+[ERROR]   mvn <args> -rf :rota-solver
+FAIL  test               exit 1
+OK    archunit           domain does not depend on Spring or Timefold
+OK    constraints        H1-H5 + M6 ConstraintVerifier tests passed
+OK    timefold-probe     forEach skips empty seats; forEachIncludingUnassigned sees them
+FAIL  solve-mini         1 unassigned seat(s) (expected 0)
+OK    solve-tight        0 hard, medium -1080, 3 unassigned with reasons
+
+--- C:\dev\rota\solver\target\p03\mini-report.txt ---
+fixture: mini
+zone: Europe/Istanbul
+score: 0hard/-360medium/0soft
+hard: 0
+medium: -360
+seats: 14
+assigned: 13
+unassigned: 1
+ASSIGNED S01#0 2026-11-23 08:00-14:00 barista -> E1
+ASSIGNED S02#0 2026-11-23 14:00-20:00 cashier -> E2
+ASSIGNED S03#0 2026-11-24 08:00-14:00 barista -> E1
+ASSIGNED S04#0 2026-11-24 14:00-20:00 cashier -> E2
+ASSIGNED S05#0 2026-11-25 08:00-14:00 barista -> E1
+ASSIGNED S06#0 2026-11-25 14:00-20:00 cashier -> E2
+ASSIGNED S07#0 2026-11-26 08:00-14:00 barista -> E1
+ASSIGNED S08#0 2026-11-26 14:00-20:00 cashier -> E2
+ASSIGNED S09#0 2026-11-27 08:00-14:00 barista -> E1
+ASSIGNED S10#0 2026-11-27 14:00-20:00 cashier -> E2
+ASSIGNED S11#0 2026-11-28 08:00-14:00 barista -> E1
+ASSIGNED S12#0 2026-11-28 14:00-20:00 cashier -> E3
+ASSIGNED S13#0 2026-11-29 08:00-14:00 barista -> E3
+UNASSIGNED S14#0 2026-11-29 14:00-20:00 cashier | E1: week total would be 42h > max 40h; E2: not available for 360 of 360 min, week total would be 36h > max 30h; E3: rest 0h next to S13#0 (min 11h)
+
+--- C:\dev\rota\solver\target\p03\tight-report.txt ---
+fixture: tight
+zone: Europe/Istanbul
+score: 0hard/-1080medium/0soft
+hard: 0
+medium: -1080
+seats: 14
+assigned: 11
+unassigned: 3
+ASSIGNED S01#0 2026-11-23 08:00-14:00 barista -> E1
+ASSIGNED S02#0 2026-11-23 14:00-20:00 cashier -> E2
+ASSIGNED S03#0 2026-11-24 08:00-14:00 barista -> E1
+ASSIGNED S04#0 2026-11-24 14:00-20:00 cashier -> E2
+ASSIGNED S05#0 2026-11-25 08:00-14:00 barista -> E1
+ASSIGNED S06#0 2026-11-25 14:00-20:00 cashier -> E2
+ASSIGNED S07#0 2026-11-26 08:00-14:00 barista -> E1
+ASSIGNED S08#0 2026-11-26 14:00-20:00 cashier -> E2
+ASSIGNED S09#0 2026-11-27 08:00-14:00 barista -> E1
+ASSIGNED S10#0 2026-11-27 14:00-20:00 cashier -> E2
+ASSIGNED S11#0 2026-11-28 08:00-14:00 barista -> E1
+UNASSIGNED S12#0 2026-11-28 14:00-20:00 cashier | E1: rest 0h next to S11#0 (min 11h), week total would be 42h > max 40h; E2: not available for 360 of 360 min, week total would be 36h > max 30h
+UNASSIGNED S13#0 2026-11-29 08:00-14:00 barista | E1: week total would be 42h > max 40h; E2: lacks skill barista, not available for 360 of 360 min, week total would be 36h > max 30h
+UNASSIGNED S14#0 2026-11-29 14:00-20:00 cashier | E1: week total would be 42h > max 40h; E2: not available for 360 of 360 min, week total would be 36h > max 30h
+
+P03 verify: 6 OK, 0 WARN, 2 FAIL
+P03 verify FAILED.
+```
+
+Status: BLOCKED. Root cause: solve-mini expects 0 unassigned seats but the mini fixture is infeasible under H4 + H5 (S14 2026-11-29 14:00-20:00 cashier unassigned: E1 would be 42h > max 40h; E2 unavailable that day and would be 36h > max 30h; E3 rest 0h after S13, needs 11h). Matches predicted F1 in .agent/QUESTIONS.md. No code fixed (per instruction: do not fix silently). Awaiting Samet decision on making mini feasible per D1 or adjusting the assertion.
+
 ## Verify log
 
 | Phase | Command | Result | Date |
@@ -328,7 +615,7 @@ P02 verify passed.
 | P00 | `pwsh -File scripts/preflight.ps1` | DONE — exit code 0, 11 OK / 4 WARN / 0 FAIL | 2026-11-18 |
 | P01 | `pwsh -NoProfile -File scripts/verify_p01.ps1` | DONE — exit code 0, 4 OK / 0 WARN / 0 FAIL | 2026-11-19 |
 | P02 | `pwsh -NoProfile -File scripts/verify.ps1 p02` | DONE — exit code 0, 4 OK / 0 WARN / 0 FAIL | 2026-11-20 |
-| P03 | `pwsh -NoProfile -File scripts/verify.ps1 p03` | CODE_WRITTEN_UNVERIFIED — not run | 2026-11-25 |
+| P03 | `pwsh -NoProfile -File scripts/verify.ps1 p03` | BLOCKED - exit code 1, 6 OK / 0 WARN / 2 FAIL (solve-mini 1 unassigned) | 2026-11-25 |
 
 ## Files changed
 
@@ -375,9 +662,10 @@ P02 verify passed.
 
 ## Next action
 
-- **Company Windows PowerShell:** review, then commit and push the P03 files
-  (message: `feat: solver module, hard constraints and coverage [P03]`).
-- **Local Windows:** `git pull --rebase origin main`, then
-  `pwsh -NoProfile -File scripts/verify.ps1 p03`; record the exact output and exit code here.
-  Follow `.agent/HANDOFF.md`. Expect `solve-mini` to FAIL until `.agent/QUESTIONS.md` F1 is
-  resolved. Do not mark DONE unless verify exits 0.
+- **Status: BLOCKED.** Local verify failed (exit code 1) on solve-mini: 1 unassigned seat expected 0.
+  Root cause: mini fixture infeasible under H4 + H5 (S14 cashier, 2026-11-29 14:00-20:00)
+  cannot be assigned to E1 (42h > max 40h), E2 (unavailable that day; 36h > max 30h) or
+  E3 (rest 0h after S13, needs 11h). Matches predicted F1.
+- No code fixed (per instruction: do not fix silently). Awaiting Samet: either make mini
+  feasible per D1 (adjust fixture/availability) or adjust the solve-mini assertion, then
+  re-run `pwsh -NoProfile -File scripts/verify.ps1 p03` and re-record.
