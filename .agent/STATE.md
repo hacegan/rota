@@ -4,8 +4,8 @@ Checkpoint file. Update after every meaningful step. Latest entry first.
 
 ## Current
 
-- **Phase:** P03 — Core domain model / solver module
-- **Status:** BLOCKED (verify failed; see P03 verify evidence)
+- **Phase:** P03 — Solver module (hard H1-H5 + coverage M6)
+- **Status:** CODE_WRITTEN_UNVERIFIED
 - **Updated:** 2026-11-25
 
 ## P03 code (company Claude sandbox, 2026-11-25)
@@ -321,218 +321,14 @@ P02 verify: 4 OK, 0 WARN, 0 FAIL
 P02 verify passed.
 ```
 
+## Verify log
 
 | Phase | Command | Result | Date |
 | --- | --- | --- | --- |
 | P00 | `pwsh -File scripts/preflight.ps1` | DONE — exit code 0, 11 OK / 4 WARN / 0 FAIL | 2026-11-18 |
 | P01 | `pwsh -NoProfile -File scripts/verify_p01.ps1` | DONE — exit code 0, 4 OK / 0 WARN / 0 FAIL | 2026-11-19 |
 | P02 | `pwsh -NoProfile -File scripts/verify.ps1 p02` | DONE — exit code 0, 4 OK / 0 WARN / 0 FAIL | 2026-11-20 |
-| P03 | `pwsh -NoProfile -File scripts/verify.ps1 p03` | BLOCKED — exit code 1, 2 OK / 0 WARN / 6 FAIL (compile error) | 2026-11-25 |
-
-## Local verify (2026-11-25)
-
-Phase: P03. Machine role: local. Commands run in order.
-
-### p01 - exit code 0
-
-```text
-Rota P01 verify
-Repository: C:\dev\rota
-
-OK    glossary           all 8 terms present
-OK    requirements       3166 bytes
-OK    fixtures           5 files
-OK    json-parse         4 JSON files parsed
-
-P01 verify: 4 OK, 0 WARN, 0 FAIL
-P01 verify passed.
-```
-
-### p02 - exit code 1 (FAILED)
-
-```text
-JAVA_HOME: C:\Users\samet\AppData\Local\Programs\Eclipse Adoptium\jdk-27.0.1.0-hotspot
-openjdk version "27.0.1.0.2" 2026-10-21
-OpenJDK Runtime Environment Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1)
-OpenJDK 64-Bit Server VM Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1, mixed mode, sharing)
-Rota P02 verify
-Repository: C:\dev\rota
-
-OK    layout             aggregator + domain, application, bootstrap
-JAVA_HOME: C:\Users\samet\AppData\Local\Programs\Eclipse Adoptium\jdk-27.0.1.0-hotspot
-openjdk version "27.0.1.0.2" 2026-10-21
-OpenJDK Runtime Environment Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1)
-OpenJDK 64-Bit Server VM Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1, mixed mode, sharing)
-[ERROR] COMPILATION ERROR : 
-[ERROR] /C:/dev/rota/solver/src/main/java/dev/rota/solver/RotaConstraintProvider.java:[69,80] incompatible types: java.lang.Long cannot be converted to java.lang.Integer
-[ERROR] /C:/dev/rota/solver/src/main/java/dev/rota/solver/RotaConstraintProvider.java:[70,17] no suitable method found for penalize(ai.timefold.solver.core.api.score.HardMediumSoftScore,RotaConstr[...]nutes)
-    method ai.timefold.solver.core.api.score.stream.bi.BiConstraintStream.<Score_>penalize(Score_) is not applicable
-      (cannot infer type-variable(s) Score_
-        (actual and formal argument lists differ in length))
-    method ai.timefold.solver.core.api.score.stream.bi.BiConstraintStream.<Score_>penalize(Score_,java.util.function.ToLongBiFunction<dev.rota.solver.RotaConstraintProvider.EmployeeWeek,java.lang.Long>) is not applicable
-      (cannot infer type-variable(s) Score_
-        (argument mismatch; invalid method reference
-          incompatible types: java.lang.Long cannot be converted to java.lang.Integer))
-[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.15.0:compile (default-compile) on project rota-solver: Compilation failure: Compilation failure: 
-[ERROR] /C:/dev/rota/solver/src/main/java/dev/rota/solver/RotaConstraintProvider.java:[69,80] incompatible types: java.lang.Long cannot be converted to java.lang.Integer
-[ERROR] /C:/dev/rota/solver/src/main/java/dev/rota/solver/RotaConstraintProvider.java:[70,17] no suitable method found for penalize(ai.timefold.solver.core.api.score.HardMediumSoftScore,RotaConstr[...]nutes)
-[ERROR]     method ai.timefold.solver.core.api.score.stream.bi.BiConstraintStream.<Score_>penalize(Score_) is not applicable
-[ERROR]       (cannot infer type-variable(s) Score_
-[ERROR]         (actual and formal argument lists differ in length))
-[ERROR]     method ai.timefold.solver.core.api.score.stream.bi.BiConstraintStream.<Score_>penalize(Score_,java.util.function.ToLongBiFunction<dev.rota.solver.RotaConstraintProvider.EmployeeWeek,java.lang.Long>) is not applicable
-[ERROR]       (cannot infer type-variable(s) Score_
-[ERROR]         (argument mismatch; invalid method reference
-[ERROR]           incompatible types: java.lang.Long cannot be converted to java.lang.Integer))
-[ERROR] -> [Help 1]
-[ERROR] 
-[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
-[ERROR] Re-run Maven using the -X switch to enable full debug logging.
-[ERROR] 
-[ERROR] For more information about the errors and possible solutions, please read the following articles:
-[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
-[ERROR] 
-[ERROR] After correcting the problems, you can resume the build with the command
-[ERROR]   mvn <args> -rf :rota-solver
-FAIL  build              exit 1
-JAVA_HOME: C:\Users\samet\AppData\Local\Programs\Eclipse Adoptium\jdk-27.0.1.0-hotspot
-openjdk version "27.0.1.0.2" 2026-10-21
-OpenJDK Runtime Environment Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1)
-OpenJDK 64-Bit Server VM Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1, mixed mode, sharing)
-SLF4J(W): No SLF4J providers were found.
-SLF4J(W): Defaulting to no-operation (NOP) logger implementation
-SLF4J(W): See https://www.slf4j.org/codes.html#noProviders for further details.
-[ERROR] COMPILATION ERROR : 
-[ERROR] /C:/dev/rota/solver/src/main/java/dev/rota/solver/RotaConstraintProvider.java:[69,80] incompatible types: java.lang.Long cannot be converted to java.lang.Integer
-[ERROR] /C:/dev/rota/solver/src/main/java/dev/rota/solver/RotaConstraintProvider.java:[70,17] no suitable method found for penalize(ai.timefold.solver.core.api.score.HardMediumSoftScore,RotaConstr[...]nutes)
-    method ai.timefold.solver.core.api.score.stream.bi.BiConstraintStream.<Score_>penalize(Score_) is not applicable
-      (cannot infer type-variable(s) Score_
-        (actual and formal argument lists differ in length))
-    method ai.timefold.solver.core.api.score.stream.bi.BiConstraintStream.<Score_>penalize(Score_,java.util.function.ToLongBiFunction<dev.rota.solver.RotaConstraintProvider.EmployeeWeek,java.lang.Long>) is not applicable
-      (cannot infer type-variable(s) Score_
-        (argument mismatch; invalid method reference
-          incompatible types: java.lang.Long cannot be converted to java.lang.Integer))
-[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.15.0:compile (default-compile) on project rota-solver: Compilation failure: Compilation failure: 
-[ERROR] /C:/dev/rota/solver/src/main/java/dev/rota/solver/RotaConstraintProvider.java:[69,80] incompatible types: java.lang.Long cannot be converted to java.lang.Integer
-[ERROR] /C:/dev/rota/solver/src/main/java/dev/rota/solver/RotaConstraintProvider.java:[70,17] no suitable method found for penalize(ai.timefold.solver.core.api.score.HardMediumSoftScore,RotaConstr[...]nutes)
-[ERROR]     method ai.timefold.solver.core.api.score.stream.bi.BiConstraintStream.<Score_>penalize(Score_) is not applicable
-[ERROR]       (cannot infer type-variable(s) Score_
-[ERROR]         (actual and formal argument lists differ in length))
-[ERROR]     method ai.timefold.solver.core.api.score.stream.bi.BiConstraintStream.<Score_>penalize(Score_,java.util.function.ToLongBiFunction<dev.rota.solver.RotaConstraintProvider.EmployeeWeek,java.lang.Long>) is not applicable
-[ERROR]       (cannot infer type-variable(s) Score_
-[ERROR]         (argument mismatch; invalid method reference
-[ERROR]           incompatible types: java.lang.Long cannot be converted to java.lang.Integer))
-[ERROR] -> [Help 1]
-[ERROR] 
-[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
-[ERROR] Re-run Maven using the -X switch to enable full debug logging.
-[ERROR] 
-[ERROR] For more information about the errors and possible solutions, please read the following articles:
-[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
-[ERROR] 
-[ERROR] After correcting the problems, you can resume the build with the command
-[ERROR]   mvn <args> -rf :rota-solver
-FAIL  test               exit 1
-OK    archunit           domain does not depend on Spring
-
-P02 verify: 2 OK, 0 WARN, 2 FAIL
-P02 verify FAILED.
-```
-
-### p03 - exit code 1 (FAILED)
-
-```text
-JAVA_HOME: C:\Users\samet\AppData\Local\Programs\Eclipse Adoptium\jdk-27.0.1.0-hotspot
-openjdk version "27.0.1.0.2" 2026-10-21
-OpenJDK Runtime Environment Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1)
-OpenJDK 64-Bit Server VM Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1, mixed mode, sharing)
-Rota P03 verify
-Repository: C:\dev\rota
-
-OK    layout             domain, solver, application, bootstrap; no Timefold in domain pom
-JAVA_HOME: C:\Users\samet\AppData\Local\Programs\Eclipse Adoptium\jdk-27.0.1.0-hotspot
-openjdk version "27.0.1.0.2" 2026-10-21
-OpenJDK Runtime Environment Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1)
-OpenJDK 64-Bit Server VM Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1, mixed mode, sharing)
-[ERROR] COMPILATION ERROR : 
-[ERROR] /C:/dev/rota/solver/src/main/java/dev/rota/solver/RotaConstraintProvider.java:[69,80] incompatible types: java.lang.Long cannot be converted to java.lang.Integer
-[ERROR] /C:/dev/rota/solver/src/main/java/dev/rota/solver/RotaConstraintProvider.java:[70,17] no suitable method found for penalize(ai.timefold.solver.core.api.score.HardMediumSoftScore,RotaConstr[...]nutes)
-    method ai.timefold.solver.core.api.score.stream.bi.BiConstraintStream.<Score_>penalize(Score_) is not applicable
-      (cannot infer type-variable(s) Score_
-        (actual and formal argument lists differ in length))
-    method ai.timefold.solver.core.api.score.stream.bi.BiConstraintStream.<Score_>penalize(Score_,java.util.function.ToLongBiFunction<dev.rota.solver.RotaConstraintProvider.EmployeeWeek,java.lang.Long>) is not applicable
-      (cannot infer type-variable(s) Score_
-        (argument mismatch; invalid method reference
-          incompatible types: java.lang.Long cannot be converted to java.lang.Integer))
-[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.15.0:compile (default-compile) on project rota-solver: Compilation failure: Compilation failure: 
-[ERROR] /C:/dev/rota/solver/src/main/java/dev/rota/solver/RotaConstraintProvider.java:[69,80] incompatible types: java.lang.Long cannot be converted to java.lang.Integer
-[ERROR] /C:/dev/rota/solver/src/main/java/dev/rota/solver/RotaConstraintProvider.java:[70,17] no suitable method found for penalize(ai.timefold.solver.core.api.score.HardMediumSoftScore,RotaConstr[...]nutes)
-[ERROR]     method ai.timefold.solver.core.api.score.stream.bi.BiConstraintStream.<Score_>penalize(Score_) is not applicable
-[ERROR]       (cannot infer type-variable(s) Score_
-[ERROR]         (actual and formal argument lists differ in length))
-[ERROR]     method ai.timefold.solver.core.api.score.stream.bi.BiConstraintStream.<Score_>penalize(Score_,java.util.function.ToLongBiFunction<dev.rota.solver.RotaConstraintProvider.EmployeeWeek,java.lang.Long>) is not applicable
-[ERROR]       (cannot infer type-variable(s) Score_
-[ERROR]         (argument mismatch; invalid method reference
-[ERROR]           incompatible types: java.lang.Long cannot be converted to java.lang.Integer))
-[ERROR] -> [Help 1]
-[ERROR] 
-[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
-[ERROR] Re-run Maven using the -X switch to enable full debug logging.
-[ERROR] 
-[ERROR] For more information about the errors and possible solutions, please read the following articles:
-[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
-[ERROR] 
-[ERROR] After correcting the problems, you can resume the build with the command
-[ERROR]   mvn <args> -rf :rota-solver
-FAIL  build              exit 1
-JAVA_HOME: C:\Users\samet\AppData\Local\Programs\Eclipse Adoptium\jdk-27.0.1.0-hotspot
-openjdk version "27.0.1.0.2" 2026-10-21
-OpenJDK Runtime Environment Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1)
-OpenJDK 64-Bit Server VM Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1, mixed mode, sharing)
-SLF4J(W): No SLF4J providers were found.
-SLF4J(W): Defaulting to no-operation (NOP) logger implementation
-SLF4J(W): See https://www.slf4j.org/codes.html#noProviders for further details.
-[ERROR] COMPILATION ERROR : 
-[ERROR] /C:/dev/rota/solver/src/main/java/dev/rota/solver/RotaConstraintProvider.java:[69,80] incompatible types: java.lang.Long cannot be converted to java.lang.Integer
-[ERROR] /C:/dev/rota/solver/src/main/java/dev/rota/solver/RotaConstraintProvider.java:[70,17] no suitable method found for penalize(ai.timefold.solver.core.api.score.HardMediumSoftScore,RotaConstr[...]nutes)
-    method ai.timefold.solver.core.api.score.stream.bi.BiConstraintStream.<Score_>penalize(Score_) is not applicable
-      (cannot infer type-variable(s) Score_
-        (actual and formal argument lists differ in length))
-    method ai.timefold.solver.core.api.score.stream.bi.BiConstraintStream.<Score_>penalize(Score_,java.util.function.ToLongBiFunction<dev.rota.solver.RotaConstraintProvider.EmployeeWeek,java.lang.Long>) is not applicable
-      (cannot infer type-variable(s) Score_
-        (argument mismatch; invalid method reference
-          incompatible types: java.lang.Long cannot be converted to java.lang.Integer))
-[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.15.0:compile (default-compile) on project rota-solver: Compilation failure: Compilation failure: 
-[ERROR] /C:/dev/rota/solver/src/main/java/dev/rota/solver/RotaConstraintProvider.java:[69,80] incompatible types: java.lang.Long cannot be converted to java.lang.Integer
-[ERROR] /C:/dev/rota/solver/src/main/java/dev/rota/solver/RotaConstraintProvider.java:[70,17] no suitable method found for penalize(ai.timefold.solver.core.api.score.HardMediumSoftScore,RotaConstr[...]nutes)
-[ERROR]     method ai.timefold.solver.core.api.score.stream.bi.BiConstraintStream.<Score_>penalize(Score_) is not applicable
-[ERROR]       (cannot infer type-variable(s) Score_
-[ERROR]         (actual and formal argument lists differ in length))
-[ERROR]     method ai.timefold.solver.core.api.score.stream.bi.BiConstraintStream.<Score_>penalize(Score_,java.util.function.ToLongBiFunction<dev.rota.solver.RotaConstraintProvider.EmployeeWeek,java.lang.Long>) is not applicable
-[ERROR]       (cannot infer type-variable(s) Score_
-[ERROR]         (argument mismatch; invalid method reference
-[ERROR]           incompatible types: java.lang.Long cannot be converted to java.lang.Integer))
-[ERROR] -> [Help 1]
-[ERROR] 
-[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
-[ERROR] Re-run Maven using the -X switch to enable full debug logging.
-[ERROR] 
-[ERROR] For more information about the errors and possible solutions, please read the following articles:
-[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
-[ERROR] 
-[ERROR] After correcting the problems, you can resume the build with the command
-[ERROR]   mvn <args> -rf :rota-solver
-FAIL  test               exit 1
-OK    archunit           domain does not depend on Spring or Timefold
-FAIL  constraints        surefire report missing: solver TEST-dev.rota.solver.RotaConstraintProviderTest.xml
-FAIL  timefold-probe     surefire report missing: solver TEST-dev.rota.solver.TimefoldBehaviourTest.xml
-FAIL  solve-mini         solver/target/p03/mini-report.txt missing
-FAIL  solve-tight        solver/target/p03/tight-report.txt missing
-
-P03 verify: 2 OK, 0 WARN, 6 FAIL
-P03 verify FAILED.
-```
-
-Status: BLOCKED. Root cause: compile error in solver/src/main/java/dev/rota/solver/RotaConstraintProvider.java lines 69-70: java.lang.Long cannot be converted to java.lang.Integer; penalize(HardMediumSoftScore, ...) overload mismatch. No code fixed (per instruction: do not fix silently). Awaiting Samet.
+| P03 | `pwsh -NoProfile -File scripts/verify.ps1 p03` | CODE_WRITTEN_UNVERIFIED — not run | 2026-11-25 |
 
 ## Files changed
 
@@ -579,9 +375,9 @@ Status: BLOCKED. Root cause: compile error in solver/src/main/java/dev/rota/solv
 
 ## Next action
 
-- **Status: BLOCKED.** Local verify failed (exit code 1) on a compile error in
-  `solver/src/main/java/dev/rota/solver/RotaConstraintProvider.java` (lines 69-70):
-  `java.lang.Long cannot be converted to java.lang.Integer`; `penalize(HardMediumSoftScore, ...)`
-  overload mismatch. No code was fixed (per instruction: do not fix silently).
-- Awaiting Samet: fix the compile error on the company side (or ONAY to fix locally), then
-  re-run `pwsh -NoProfile -File scripts/verify.ps1 p03` and re-record.
+- **Company Windows PowerShell:** review, then commit and push the P03 files
+  (message: `feat: solver module, hard constraints and coverage [P03]`).
+- **Local Windows:** `git pull --rebase origin main`, then
+  `pwsh -NoProfile -File scripts/verify.ps1 p03`; record the exact output and exit code here.
+  Follow `.agent/HANDOFF.md`. Expect `solve-mini` to FAIL until `.agent/QUESTIONS.md` F1 is
+  resolved. Do not mark DONE unless verify exits 0.

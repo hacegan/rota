@@ -71,8 +71,12 @@ public final class RotaConstraintProvider implements ConstraintProvider {
                 .asConstraint("H5 max hours per week");
     }
 
-    /** H5 weigher. Integer matches the result type of {@code sum(ToIntFunction)} (QUESTIONS A3). */
-    static int excessMinutes(EmployeeWeek employeeWeek, Integer minutes) {
+    /**
+     * H5 weigher: assigned minutes above the weekly cap. Types proven by the 2.8.0 compiler (local
+     * verify 2026-11-25): {@code groupBy(..., sum(...))} yields {@code Long}, and
+     * {@code BiConstraintStream.penalize(Score, ToLongBiFunction)} takes a long weight. No narrowing.
+     */
+    static long excessMinutes(EmployeeWeek employeeWeek, Long minutes) {
         return minutes - employeeWeek.employee().getMaxMinutesPerWeek();
     }
 
