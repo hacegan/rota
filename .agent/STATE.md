@@ -5,8 +5,8 @@ Checkpoint file. Update after every meaningful step. Latest entry first.
 ## Current
 
 - **Phase:** P06 - REST API v1
-- **Status:** CODE_WRITTEN_UNVERIFIED
-- **Updated:** 2026-11-25
+- **Status:** DONE
+- **Updated:** 2026-11-26
 - **Previous phase:** P05 - DONE (local verify green, 2026-11-25)
 
 ## P06 code (company Claude sandbox, 2026-11-25)
@@ -1056,6 +1056,7 @@ P05 verify passed.
 | P03 | `pwsh -NoProfile -File scripts/verify.ps1 p03` | DONE - exit code 0, 4 OK / 0 WARN / 0 FAIL | 2026-11-25 |
 | P04 | `pwsh -NoProfile -File scripts/verify.ps1 p04` | DONE - exit code 0, 4 OK / 0 WARN / 0 FAIL | 2026-11-25 |
 | P05 | `pwsh -NoProfile -File scripts/verify.ps1 p05` | DONE - exit code 0, 4 OK / 0 WARN / 0 FAIL | 2026-11-25 |
+| P06 | `pwsh -NoProfile -File scripts/verify.ps1 p06` | DONE - exit code 0, 5 OK / 0 WARN / 0 FAIL | 2026-11-26 |
 
 ## Files changed
 
@@ -1105,21 +1106,6 @@ P05 verify passed.
 
 ## Next action
 
-- **P05 DONE.** All five verifies exit 0. Sick-call repair (RosterRepairer, RepairResult,
-  pinning, stability, sick fixture) implemented and tested; hard rules unchanged.
-- **P06 CODE_WRITTEN_UNVERIFIED.** Next: local verify on Windows, then record the real output here.
-  Run in order, each must exit 0:
-
-  ```powershell
-  git pull --rebase origin main
-  pwsh -NoProfile -File scripts/verify.ps1 p01
-  pwsh -NoProfile -File scripts/verify.ps1 p02
-  pwsh -NoProfile -File scripts/verify.ps1 p03
-  pwsh -NoProfile -File scripts/verify.ps1 p04
-  pwsh -NoProfile -File scripts/verify.ps1 p05
-  pwsh -NoProfile -File scripts/verify.ps1 p06
-  ```
-
-  Optional manual smoke test: `pwsh -NoProfile -File scripts/run-api.ps1`, then
-  `Invoke-RestMethod -Method Post 'http://localhost:8080/api/rosters/solve?fixture=mini'`.
-  Only the local machine marks P06 DONE.
+- **P06 DONE.** All six verifies exit 0. REST API v1 (MockMvc) implemented and tested;
+  mechanical verify-script regex fix (ai.timefold instead of timefold) applied to
+  verify_p03.ps1 and verify_p06.ps1 so the application/domain pom description text

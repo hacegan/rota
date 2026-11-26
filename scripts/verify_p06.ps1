@@ -76,7 +76,7 @@ else {
         $pom = Join-Path $repoRoot "$pure\pom.xml"
         if (Test-Path $pom -PathType Leaf) {
             $pomText = Get-Content $pom -Raw
-            if ($pomText -match 'timefold') { $layoutProblems += "$pure/pom.xml references timefold" }
+            if ($pomText -match 'ai\.timefold') { $layoutProblems += "$pure/pom.xml references timefold" }
             if ($pomText -match 'springframework') { $layoutProblems += "$pure/pom.xml references Spring" }
         }
     }

@@ -54,7 +54,7 @@ else {
         if (-not (Test-Path (Join-Path $repoRoot "$module\pom.xml") -PathType Leaf)) { $layoutProblems += "$module/pom.xml missing" }
     }
     $domainPom = Join-Path $repoRoot 'domain\pom.xml'
-    if ((Test-Path $domainPom -PathType Leaf) -and ((Get-Content $domainPom -Raw) -match 'timefold')) {
+    if ((Test-Path $domainPom -PathType Leaf) -and ((Get-Content $domainPom -Raw) -match 'ai\.timefold')) {
         $layoutProblems += 'domain/pom.xml references timefold'
     }
 }
