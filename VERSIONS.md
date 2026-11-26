@@ -182,3 +182,32 @@ openjdk version "27.0.1.0.2" 2026-10-21
 OpenJDK Runtime Environment Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1)
 OpenJDK 64-Bit Server VM Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1, mixed mode, sharing)
 ```
+
+## Frontend — npm (resolved 2026-11-26)
+
+Resolved via `npm view <pkg> version` against the configured npm registry.
+GA versions only (no `-beta`/`-rc`/`-alpha`/`-next`). Do not create the web app yet.
+
+| Package | Version | Source URL |
+| --- | --- | --- |
+| `next` | 16.4.6 | https://registry.npmjs.org/next |
+| `react` | 19.3.1 | https://registry.npmjs.org/react |
+| `react-dom` | 19.3.1 | https://registry.npmjs.org/react-dom |
+| `typescript` | 7.0.2 | https://registry.npmjs.org/typescript |
+| `@types/react` | 19.3.3 | https://registry.npmjs.org/@types/react |
+| `@types/node` | 26.6.11 | https://registry.npmjs.org/@types/node |
+
+### Evidence
+
+Command and output for each (run 2026-11-26):
+
+```powershell
+npm view next version       # -> 16.4.6
+npm view react version      # -> 19.3.1
+npm view react-dom version  # -> 19.3.1
+npm view typescript version # -> 7.0.2
+npm view @types/react version # -> 19.3.3
+npm view @types/node version # -> 26.6.11
+```
+
+No web app created; versions recorded only.
