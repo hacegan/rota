@@ -37,3 +37,9 @@ TestResults/
 !.agent/QUESTIONS.md
 
 .agent/MACHINE.md
+
+# Frontend build outputs
+node_modules/
+.next/
+test-results/
+playwright-report/

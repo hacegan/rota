@@ -130,14 +130,14 @@ if (-not $canRun) {
     Add-Result -Name 'build' -Status FAIL -Detail 'skipped'
 }
 else {
-    $installExit = Invoke-Npm -Arguments @('install', '--no-audit', '--no-fund')
+    $installExit = Invoke-Npm -Arguments @('ci', '--no-audit', '--no-fund')
     if ($installExit -ne 0) {
-        Add-Result -Name 'install' -Status FAIL -Detail "npm install exit $installExit"
+        Add-Result -Name 'install' -Status FAIL -Detail "npm ci exit $installExit"
         Add-Result -Name 'typecheck' -Status FAIL -Detail 'skipped (install failed)'
         Add-Result -Name 'build' -Status FAIL -Detail 'skipped (install failed)'
     }
     else {
-        Add-Result -Name 'install' -Status OK -Detail 'npm install'
+        Add-Result -Name 'install' -Status OK -Detail 'npm ci'
         $typecheckExit = Invoke-Npm -Arguments @('run', 'typecheck')
         if ($typecheckExit -eq 0) { Add-Result -Name 'typecheck' -Status OK -Detail 'next typegen && tsc --noEmit' }
         else { Add-Result -Name 'typecheck' -Status FAIL -Detail "npm run typecheck exit $typecheckExit" }

@@ -9,10 +9,18 @@ Rules for AI agents working in this repository (project **Rota**, a shift schedu
    version number. Run `scripts/preflight.ps1` before claiming the environment is ready.
 2. **Work only inside this repository.** All edits, scripts, and artifacts stay under
    `C:\dev\rota`. Do not create, modify, or delete files outside the repo.
-3. **No destructive commands without my ONAY.** Deletions, `git reset --hard`, `git clean`,
-   force pushes, dropping data, `Remove-Item -Recurse -Force`, disk/format commands, and
-   similar require an explicit "ONAY" from the user in chat first. Prefer non-destructive
-   alternatives.
+3. **Safety policy (work autonomously inside the repo).** Allowed without asking: read/edit/create
+   files in the repo; git status/diff/log/add/commit/pull --rebase/push (non-force)/stash/
+   restore/checkout of tracked files; build/test with mvnw, npm install/ci/run, node, tsc,
+   playwright; docker compose up/down/config/logs/ps; deleting build outputs only (target/,
+   node_modules/, .next/, test-results/, playwright-report/); stopping a process ONLY after
+   verifying its command line belongs to this repo. Forbidden (stop and ask): any OS change
+   (system/user PATH or JAVA_HOME, execution policy, WindowsApps aliases, registry, services,
+   firewall); installing/uninstalling software (winget, choco, npm -g); git push --force,
+   history rewrite, git clean -xfd, deleting main; docker compose down -v, docker volume rm,
+   docker system prune; deleting fixtures, docs, migrations, or anything outside build outputs;
+   writing outside the repo, or "repairing" Windows/PowerShell. Commit npm lockfiles. Use npm ci
+   when a lockfile exists.
 4. **Phase-by-phase, with verify output.** Work one roadmap phase at a time
    (`docs/plan/ROADMAP.md`). A phase is not done until its documented verify command has
    been run and its **real output** is recorded. Never mark a phase complete from memory or

@@ -16,8 +16,8 @@
     tools     node, npm, npx on PATH
     ports     8080 (API) and 3000 (web) are free, so the run uses freshly built servers
     build     scripts/build.ps1 (bootstrap jar for run-api.ps1 -SkipBuild)
-    web-npm   npm install in web/
-    e2e-npm   npm install in e2e/
+    web-npm   npm ci in web/
+    e2e-npm   npm ci in e2e/
     browser   npx playwright install chromium
     e2e       npx playwright test (CI=1). playwright.config.ts starts the API
               (scripts/run-api.ps1 -SkipBuild) and the web app (next build + next start), runs
@@ -147,8 +147,8 @@ else { Add-Result -Name 'ports' -Status OK -Detail '8080 and 3000 free' }
 # --- Steps (each needs the previous ones) ---
 $steps = @(
     @{ Name = 'build'; Detail = 'scripts/build.ps1 (API jar)'; Run = { & (Join-Path $PSScriptRoot 'build.ps1') | Out-Host; $LASTEXITCODE } },
-    @{ Name = 'web-npm'; Detail = 'npm install (web)'; Run = { Invoke-In -Directory $webDir -Tool $npm -Arguments @('install', '--no-audit', '--no-fund') } },
-    @{ Name = 'e2e-npm'; Detail = 'npm install (e2e)'; Run = { Invoke-In -Directory $e2eDir -Tool $npm -Arguments @('install', '--no-audit', '--no-fund') } },
+    @{ Name = 'web-npm'; Detail = 'npm ci (web)'; Run = { Invoke-In -Directory $webDir -Tool $npm -Arguments @('ci', '--no-audit', '--no-fund') } },
+    @{ Name = 'e2e-npm'; Detail = 'npm ci (e2e)'; Run = { Invoke-In -Directory $e2eDir -Tool $npm -Arguments @('ci', '--no-audit', '--no-fund') } },
     @{ Name = 'browser'; Detail = 'npx playwright install chromium'; Run = { Invoke-In -Directory $e2eDir -Tool $npx -Arguments @('playwright', 'install', 'chromium') } }
 )
 

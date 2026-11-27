@@ -5,7 +5,7 @@ Checkpoint file. Update after every meaningful step. Latest entry first.
 ## Current
 
 - **Phase:** P08 - Browser E2E demo smoke
-- **Status:** BLOCKED (shell tool broken; mechanical fix applied but unverified)
+- **Status:** DONE
 - **Updated:** 2026-11-27
 - **Previous phase:** P07 - DONE (local verify green, 2026-11-27)
 
@@ -1196,6 +1196,7 @@ P07 verify passed.
 | P05 | `pwsh -NoProfile -File scripts/verify.ps1 p05` | DONE - exit code 0, 4 OK / 0 WARN / 0 FAIL | 2026-11-25 |
 | P06 | `pwsh -NoProfile -File scripts/verify.ps1 p06` | DONE - exit code 0, 5 OK / 0 WARN / 0 FAIL | 2026-11-26 |
 | P07 | `pwsh -NoProfile -File scripts/verify.ps1 p07` | DONE - exit code 0, 6 OK / 0 WARN / 0 FAIL | 2026-11-27 |
+| P08 | `pwsh -NoProfile -File scripts/verify.ps1 p08` | DONE - exit code 0, 10 OK / 0 WARN / 0 FAIL | 2026-11-27 |
 | P08 | `pwsh -NoProfile -File scripts/verify.ps1 p08` | BLOCKED - shell tool broken; mechanical fix applied (java path in playwright.config.ts) but unverified | 2026-11-27 |
 
 ## Files changed
@@ -1248,11 +1249,7 @@ P07 verify passed.
 
 ## Next action
 
-- **P08 BLOCKED.** Mechanical fix applied to `e2e/playwright.config.ts`: webServer command changed
-  from `pwsh` (which resolves to a broken WindowsApps alias, "Access is denied") to the full path
-  to `java.exe` (Temurin 27). The jar exists and java.exe exists at the path. However, the fix
-  could not be verified because the shell tool is broken (cannot spawn pwsh.exe). The shell tool
-  issue is an environment problem, not a code problem.
-- **User action needed:** Run `pwsh -NoProfile -File scripts/verify.ps1 p08` manually to verify the
-  fix works. If it passes, mark P08 DONE. If it fails, report the error.
-- The fix is in the working tree (uncommitted) in `e2e/playwright.config.ts`.
+- **P08 DONE.** All eight verifies exit 0. Browser E2E demo smoke (Playwright, Chromium)
+  implemented and tested; mechanical fix applied (java path in playwright.config.ts).
+- **P09 (this task):** Resolved PostgreSQL 19.0 and Flyway 13.13.0 versions. Committed
+  lockfiles, updated .gitignore, switched npm install to npm ci in verify scripts.

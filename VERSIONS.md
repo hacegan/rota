@@ -229,3 +229,35 @@ npm view @playwright/test version   # -> 1.65.1
 ```
 
 No tests created; version recorded only.
+
+## P09 — PostgreSQL and Flyway (resolved 2026-11-27)
+
+### PostgreSQL image tag
+
+Resolved from Docker Hub:
+```powershell
+(Invoke-RestMethod "https://hub.docker.com/v2/repositories/library/postgres/tags?page_size=100&ordering=last_updated").results.name
+```
+
+Highest stable numeric tag (no "latest", no "alpine", no rc/beta/alpha, no distro suffix):
+**19.0**
+
+### Flyway
+
+Resolved from Maven Central maven-metadata.xml:
+- flyway-core: latest GA = **13.13.0**
+- flyway-database-postgresql: latest GA = **13.13.0**
+
+Commands:
+```powershell
+(Invoke-WebRequest -Uri 'https://repo1.maven.org/maven2/org/flywaydb/flyway-core/maven-metadata.xml' -UseBasicParsing).Content
+(Invoke-WebRequest -Uri 'https://repo1.maven.org/maven2/org/flywaydb/flyway-database-postgresql/maven-metadata.xml' -UseBasicParsing).Content
+```
+
+Both report `<latest>13.13.0</latest>` and `<release>13.13.0</release>`.
+
+| Artifact | Version | Metadata URL |
+| --- | --- | --- |
+| `postgres` (Docker image) | 19.0 | https://hub.docker.com/v2/repositories/library/postgres/tags |
+| `org.flywaydb:flyway-core` | 13.13.0 | https://repo1.maven.org/maven2/org/flywaydb/flyway-core/maven-metadata.xml |
+| `org.flywaydb:flyway-database-postgresql` | 13.13.0 | https://repo1.maven.org/maven2/org/flywaydb/flyway-database-postgresql/maven-metadata.xml |
