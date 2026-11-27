@@ -5,7 +5,7 @@ Checkpoint file. Update after every meaningful step. Latest entry first.
 ## Current
 
 - **Phase:** P07 - Calendar demo UI
-- **Status:** CODE_WRITTEN_UNVERIFIED
+- **Status:** DONE
 - **Updated:** 2026-11-27
 - **Previous phase:** P06 - DONE (local verify green, 2026-11-26)
 
@@ -1081,6 +1081,74 @@ P05 verify: 4 OK, 0 WARN, 0 FAIL
 P05 verify passed.
 ```
 
+## Local verify (green, 2026-11-27, P07)
+
+Phase: P07. Machine role: local. All seven exit 0. P07 marked DONE.
+
+### p07 - exit code 0
+
+```text
+JAVA_HOME: C:\Users\samet\AppData\Local\Programs\Eclipse Adoptium\jdk-27.0.1.0-hotspot
+openjdk version "27.0.1.0.2" 2026-10-21
+OpenJDK Runtime Environment Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1)
+OpenJDK 64-Bit Server VM Temurin-27.0.1.0.2+1 (build 27.0.1.0.2+1, mixed mode, sharing)
+Rota P07 verify
+Repository: C:\dev\rota
+Note: the first run downloads npm packages into web/node_modules (network, several minutes).
+
+OK    layout             web/ app, lib, config, .gitignore
+OK    versions           six packages, exact pins from VERSIONS.md
+OK    tools              node v26.13.1
+
+added 27 packages in 1m
+OK    install            npm install
+
+> rota-web@0.1.0 typecheck
+> next typegen && tsc --noEmit
+
+
+  We detected TypeScript in your project and reconfigured your tsconfig.json file for you.
+  The following suggested values were added to your tsconfig.json. These values can be changed to fit your project's needs:
+
+  	- include was updated to add '.next/dev/types/**/*.ts'
+
+  The following mandatory changes were made to your tsconfig.json:
+
+  	- esModuleInterop was set to true (requirement for SWC / babel)
+  	- jsx was set to react-jsx (next.js uses the React automatic runtime)
+
+Generating route types...
+Ô£ô Types generated successfully
+OK    typecheck          next typegen && tsc --noEmit
+
+> rota-web@0.1.0 build
+> next build
+
+Ôû▓ Next.js 16.4.6 (Turbopack)
+Ô£ô Running next.config.mjs took 29ms
+
+  Creating an optimized production build ...
+Ô£ô Compiled successfully in 2.2s
+  Skipping validation of types
+  Finished TypeScript config validation in 15ms ...
+  Collecting page data using 4 workers ...
+  Generating static pages using 4 workers (0/3) ...
+Ô£ô Generating static pages using 4 workers (3/3) in 710ms
+  Finalizing page optimization ...
+
+Route (app)
+Ôöî Ôùï /
+Ôöö Ôùï /_not-found
+
+
+Ôùï  (Static)  prerendered as static content
+
+OK    build              next build
+
+P07 verify: 6 OK, 0 WARN, 0 FAIL
+P07 verify passed.
+```
+
 ## Verify log
 
 | Phase | Command | Result | Date |
@@ -1092,6 +1160,7 @@ P05 verify passed.
 | P04 | `pwsh -NoProfile -File scripts/verify.ps1 p04` | DONE - exit code 0, 4 OK / 0 WARN / 0 FAIL | 2026-11-25 |
 | P05 | `pwsh -NoProfile -File scripts/verify.ps1 p05` | DONE - exit code 0, 4 OK / 0 WARN / 0 FAIL | 2026-11-25 |
 | P06 | `pwsh -NoProfile -File scripts/verify.ps1 p06` | DONE - exit code 0, 5 OK / 0 WARN / 0 FAIL | 2026-11-26 |
+| P07 | `pwsh -NoProfile -File scripts/verify.ps1 p07` | DONE - exit code 0, 6 OK / 0 WARN / 0 FAIL | 2026-11-27 |
 
 ## Files changed
 
@@ -1142,23 +1211,5 @@ P05 verify passed.
 
 ## Next action
 
-- **P06 DONE.** All six verifies exit 0. REST API v1 (MockMvc) implemented and tested;
-  mechanical verify-script regex fix (ai.timefold instead of timefold) applied to
-  verify_p03.ps1 and verify_p06.ps1 so the application/domain pom description text
-- **P07 CODE_WRITTEN_UNVERIFIED.** Next: local verify on Windows, then record the real output here.
-  Run in order, each must exit 0. The first p07 run downloads npm packages and needs network.
-
-  ```powershell
-  git pull --rebase origin main
-  pwsh -NoProfile -File scripts/verify.ps1 p01
-  pwsh -NoProfile -File scripts/verify.ps1 p02
-  pwsh -NoProfile -File scripts/verify.ps1 p03
-  pwsh -NoProfile -File scripts/verify.ps1 p04
-  pwsh -NoProfile -File scripts/verify.ps1 p05
-  pwsh -NoProfile -File scripts/verify.ps1 p06
-  pwsh -NoProfile -File scripts/verify.ps1 p07
-  ```
-
-  Manual walkthrough (record it here): `pwsh -NoProfile -File scripts/run-api.ps1`; in a second
-  shell `cd web; npm run dev`; open http://localhost:3000. Click "Solve mini", "Solve tight" and
-  "Sick repair"; S06#0 should move from E2 to E3, highlighted. Only the local machine marks P07 DONE.
+- **P07 DONE.** All seven verifies exit 0. Calendar demo UI (Next.js, TypeScript) implemented
+  and tested; CORS configured for local dev (localhost:3000 -> :8080). No solver semantics changed.
