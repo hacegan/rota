@@ -211,3 +211,21 @@ npm view @types/node version # -> 26.6.11
 ```
 
 No web app created; versions recorded only.
+
+## Frontend (P08) — Playwright (resolved 2026-11-27)
+
+Resolved via `npm view @playwright/test version` against the configured npm registry.
+GA version only.
+
+| Package | Version | Source URL |
+| --- | --- | --- |
+| `@playwright/test` | 1.65.1 | https://registry.npmjs.org/@playwright/test |
+
+### Evidence
+
+Command:
+```powershell
+npm view @playwright/test version   # -> 1.65.1
+```
+
+No tests created; version recorded only.
