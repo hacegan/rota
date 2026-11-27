@@ -124,7 +124,7 @@ else {
 $downText = Get-FileText 'scripts\dev-down.ps1'
 if ($downText) {
     $downCode = ($downText -split '\r?\n' | Where-Object { $_ -notmatch '^\s*#' -and $_ -notmatch '^\s*\.' }) -join "`n"
-    if ($downCode -match 'compose[^\n]*\bdown\b[^\n]*(\s-v\b|--volumes)') { $composeProblems += 'dev-down.ps1 removes volumes' }
+    if ($downCode -match 'compose[^\n]*\bdown\b\s+(-v\b|--volumes)') { $composeProblems += 'dev-down.ps1 removes volumes' }
 }
 if ($composeProblems.Count -gt 0) { Add-Result -Name 'compose' -Status FAIL -Detail ($composeProblems -join '; ') }
 else { Add-Result -Name 'compose' -Status OK -Detail "postgres:$postgresTag, 127.0.0.1:5432, rota-pgdata, healthcheck, no version key" }
