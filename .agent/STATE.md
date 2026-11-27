@@ -5,7 +5,7 @@ Checkpoint file. Update after every meaningful step. Latest entry first.
 ## Current
 
 - **Phase:** P08 - Browser E2E demo smoke
-- **Status:** CODE_WRITTEN_UNVERIFIED
+- **Status:** BLOCKED (shell tool broken; mechanical fix applied but unverified)
 - **Updated:** 2026-11-27
 - **Previous phase:** P07 - DONE (local verify green, 2026-11-27)
 
@@ -1196,6 +1196,7 @@ P07 verify passed.
 | P05 | `pwsh -NoProfile -File scripts/verify.ps1 p05` | DONE - exit code 0, 4 OK / 0 WARN / 0 FAIL | 2026-11-25 |
 | P06 | `pwsh -NoProfile -File scripts/verify.ps1 p06` | DONE - exit code 0, 5 OK / 0 WARN / 0 FAIL | 2026-11-26 |
 | P07 | `pwsh -NoProfile -File scripts/verify.ps1 p07` | DONE - exit code 0, 6 OK / 0 WARN / 0 FAIL | 2026-11-27 |
+| P08 | `pwsh -NoProfile -File scripts/verify.ps1 p08` | BLOCKED - shell tool broken; mechanical fix applied (java path in playwright.config.ts) but unverified | 2026-11-27 |
 
 ## Files changed
 
@@ -1247,23 +1248,11 @@ P07 verify passed.
 
 ## Next action
 
-- **P07 DONE.** All seven verifies exit 0. Calendar demo UI (Next.js, TypeScript) implemented
-  and tested; CORS configured for local dev (localhost:3000 -> :8080). No solver semantics changed.
-- **P08 CODE_WRITTEN_UNVERIFIED.** Next: local verify on Windows, then record the real output here.
-  Stop any running API (8080) or web app (3000) first. Run in order, each must exit 0. The first
-  p08 run downloads npm packages and Chromium and needs network.
-
-  ```powershell
-  git pull --rebase origin main
-  pwsh -NoProfile -File scripts/verify.ps1 p01
-  pwsh -NoProfile -File scripts/verify.ps1 p02
-  pwsh -NoProfile -File scripts/verify.ps1 p03
-  pwsh -NoProfile -File scripts/verify.ps1 p04
-  pwsh -NoProfile -File scripts/verify.ps1 p05
-  pwsh -NoProfile -File scripts/verify.ps1 p06
-  pwsh -NoProfile -File scripts/verify.ps1 p07
-  pwsh -NoProfile -File scripts/verify.ps1 p08
-  ```
-
-  After a green p08: check `docs/demo/rota-demo.png` (sick repair, S06#0 E2 → E3 highlighted) and
-  commit it from company Windows. Only the local machine marks P08 DONE.
+- **P08 BLOCKED.** Mechanical fix applied to `e2e/playwright.config.ts`: webServer command changed
+  from `pwsh` (which resolves to a broken WindowsApps alias, "Access is denied") to the full path
+  to `java.exe` (Temurin 27). The jar exists and java.exe exists at the path. However, the fix
+  could not be verified because the shell tool is broken (cannot spawn pwsh.exe). The shell tool
+  issue is an environment problem, not a code problem.
+- **User action needed:** Run `pwsh -NoProfile -File scripts/verify.ps1 p08` manually to verify the
+  fix works. If it passes, mark P08 DONE. If it fails, report the error.
+- The fix is in the working tree (uncommitted) in `e2e/playwright.config.ts`.

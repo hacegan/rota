@@ -14,6 +14,12 @@ const apiBase = "http://localhost:8080";
 const webBase = "http://localhost:3000";
 const reuse = !process.env.CI;
 
+const javaHome = process.env.JAVA_HOME;
+if (!javaHome) {
+  throw new Error("JAVA_HOME missing; run scripts/env.ps1 first");
+}
+const javaExe = path.join(javaHome, "bin", process.platform === "win32" ? "java.exe" : "java");
+
 export default defineConfig({
   testDir: "./tests",
   // One shared API and a CPU-heavy solver: run tests one after another.
@@ -34,7 +40,7 @@ export default defineConfig({
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"], viewport: { width: 1440, height: 900 } } }],
   webServer: [
     {
-      command: "pwsh -NoProfile -File scripts/run-api.ps1 -SkipBuild -Port 8080",
+      command: `"${javaExe}" -jar bootstrap/target/rota-bootstrap-0.1.0-SNAPSHOT.jar --server.port=8080 --rota.fixtures-dir=fixtures`,
       cwd: repoRoot,
       url: `${apiBase}/api/health`,
       timeout: 180_000,
