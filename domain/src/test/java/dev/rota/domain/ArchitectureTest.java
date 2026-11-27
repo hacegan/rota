@@ -24,4 +24,13 @@ class ArchitectureTest {
                 .resideInAPackage("ai.timefold..");
         rule.check(domainClasses);
     }
+
+    /** P09: persistence stays in the persistence module. */
+    @Test
+    void domainMustNotDependOnJpa() {
+        JavaClasses domainClasses = new ClassFileImporter().importPackages("dev.rota.domain");
+        ArchRule rule = noClasses().should().dependOnClassesThat()
+                .resideInAnyPackage("jakarta.persistence..", "org.hibernate..", "org.flywaydb..");
+        rule.check(domainClasses);
+    }
 }

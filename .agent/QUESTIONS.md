@@ -322,3 +322,74 @@ No new Timefold API. The bootstrap adapter only calls the solver module's own pu
   a stale API or web app. Running `npx playwright test` by hand reuses running ones.
 - **O7 Screenshot `docs/demo/rota-demo.png`** is full-page at 1440×900 after the sick repair. It
   is not gitignored: commit it from company Windows after a green run.
+
+## P09 — PostgreSQL persistence (2026-11-27)
+
+### P. UNVERIFIED (no sandbox build, no Docker; confirm on the local run)
+
+- **P1 Boot-managed library versions.** Versions not in VERSIONS.md come from the Spring Boot
+  4.1.2 parent's dependency management, like `spring-boot-starter-test` before:
+  `spring-data-jpa`, `hibernate-core`, `HikariCP`, `org.postgresql:postgresql`.
+
+  Explicit versions from VERSIONS.md: Flyway 13.13.0 (core + database-postgresql) and Testcontainers
+  2.0.5. If the parent does not manage one of the four, the build names it. The mechanical fix is
+  adding the version Samet records in VERSIONS.md.
+- **P2 No Spring Boot persistence auto-configuration, on purpose.** `persistence` depends on plain
+  libraries, not `spring-boot-starter-data-jpa`/`-flyway`. `PersistenceConfiguration`
+  (`@Profile("postgres")`) builds:
+  - a HikariDataSource;
+  - Flyway (migrate at startup);
+  - a `LocalContainerEntityManagerFactoryBean` with `HibernateJpaVendorAdapter`;
+  - a `JpaTransactionManager`;
+  - `@EnableJpaRepositories`.
+
+  Assumption: Boot 4's auto-configuration is modular (JDBC/JPA/Flyway auto-config only with their
+  `spring-boot-*` modules), so the default profile creates no DataSource even though Hikari,
+  Hibernate and Spring Data are on the classpath. `DefaultProfileWiringTest` asserts exactly that.
+
+  If Boot still auto-configures a DataSource in the default profile, the fix is an Opus decision:
+  exclude it or restructure. It is not mechanical.
+- **P3 Flyway 13.13.0 with PostgreSQL 19.0.** It uses only `Flyway.configure().dataSource(…)
+  .locations(…).load().migrate()`, an API stable for many releases.
+  - Flyway may warn that PostgreSQL 19 is newer than it was tested with. A warning is fine.
+  - A hard "unsupported version" error needs Samet: Flyway or postgres versions in VERSIONS.md.
+- **P4 Postgres image data path.** postgres 18+ images moved `PGDATA` under a versioned
+  subdirectory of `/var/lib/postgresql`, so the volume `rota-pgdata` is mounted at
+  `/var/lib/postgresql`. If the 19.0 image still uses `/var/lib/postgresql/data` directly, data
+  still persists (it is inside the mount). Confirm the healthcheck passes with `dev-up.ps1`.
+- **P5 Testcontainers 2.0.5 API.** Only core classes are used: `GenericContainer`,
+  `DockerImageName`, `Wait.forLogMessage`, `getHost`, `getMappedPort`, and the started-in-static-init
+  pattern. They come from the `testcontainers` artifact with no module artifacts, because 2.0
+  renamed modules and moved `PostgreSQLContainer`. Spring wiring uses spring-test's
+  `@DynamicPropertySource`. Containers are removed by Ryuk at JVM exit.
+- **P6 Hibernate mapping.**
+  - `Instant` → `timestamptz`.
+  - `@ElementCollection` + `@OrderColumn(name = "position")` → collection tables with primary key
+    `(roster_id, position)`.
+  - Field access on `@Embeddable` row classes.
+  - Hibernate never touches the schema (`hibernate.hbm2ddl.auto=none`); Flyway owns it.
+
+  The round-trip tests compare full records, so a mapping mismatch fails loudly.
+- **P7 Docker on local Windows.** verify_p09 needs Docker Desktop running: Testcontainers, then
+  `docker compose config`. Without Docker, `test` is skipped and reported FAIL, not silently
+  passed.
+
+### Q. P09 assumptions and decisions
+
+- **Q1 ROADMAP P09 was "Optimization (CP-SAT/ILP)".** It is not in the stack. P13 "Persistence
+  (SQLite)" conflicts with STACK.md (PostgreSQL). Persistence moved to P09; P13 needs re-scoping.
+- **Q2 Storage shape.**
+  - Four tables (V1-V4) plus `roster_id_seq`; roster ids are `r<seq>`.
+  - Reasons and pinned seat ids are stored as newline-separated text, keeping four tables as asked.
+    A reason containing a newline is rejected, not split.
+  - Order of seats, changes and reasons is preserved.
+  - Saving an existing id replaces it.
+- **Q3 `rota.datasource.*` properties**, not `spring.datasource.*`, because there is no Boot
+  auto-configuration (P2). `application-postgres.properties` reads `POSTGRES_HOST/PORT/DB/USER/PASSWORD`
+  from the environment. `run-api-postgres.ps1` loads them from `.env` into its own process only.
+- **Q4 STACK.md modules list** does not name `persistence` yet. Adding a module inside the
+  existing stack (Spring Data JPA, Flyway, PostgreSQL) is not a stack change, but Samet may want
+  STACK.md updated. Not edited here.
+- **Q5 Separate test databases.** Testcontainers uses throwaway containers with test-only
+  credentials (`rota-test-only`). The dev database (`dev-up.ps1`, volume `rota-pgdata`) is never
+  touched by tests or verify.

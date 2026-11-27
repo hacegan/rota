@@ -24,7 +24,7 @@ verify command, and is checkpointed in `.agent/STATE.md`.
 | P06 | REST API v1 | Runnable Spring Boot API around the solver: solve, repair, get roster | `pwsh -NoProfile -File scripts/verify.ps1 p06` exits 0 |
 | P07 | Calendar demo UI | Next.js week grid over the P06 API: solve, sick repair diff, score, unassigned | `pwsh -NoProfile -File scripts/verify.ps1 p07` exits 0 |
 | P08 | Browser E2E demo smoke | Playwright drives the demo UI against the real API; screenshot | `pwsh -NoProfile -File scripts/verify.ps1 p08` exits 0 |
-| P09 | Optimization (optional) | CP-SAT / ILP exact solve | Matches brute force on small fixture |
+| P09 | PostgreSQL persistence | Rosters in PostgreSQL (JPA, Flyway) under profile `postgres`; local compose; Testcontainers tests | `pwsh -NoProfile -File scripts/verify.ps1 p09` exits 0 |
 | P10 | Validation | Invariant checks and reports | Validator catches seeded errors |
 | P11 | CLI | `validate`, `solve`, `export` commands | End-to-end run on fixture |
 | P12 | Export | CSV / PDF / ICS roster output | Exports re-parse and validate |
@@ -323,22 +323,47 @@ must be free.
 
 ---
 
-## P09 — Optimization (optional)
+## P09 — PostgreSQL persistence
 
-**Goal:** Exact optimum on small instances.
+**Goal:** Stored rosters survive restarts: PostgreSQL behind the existing application roster port,
+without touching domain, application or the default in-memory demo.
+
+**Scope changed 2026-11-27 (Samet).** The original P09 was "Optimization (optional): a CP-SAT /
+ILP exact solve as a test oracle". The binding solver is Timefold (STACK.md); CP-SAT/ILP is not
+in the stack and would need an ADR. The original P13 "Persistence: repository + SQLite" conflicts
+with STACK.md (PostgreSQL, Flyway, Spring Data JPA). Persistence moves here, on the stack's
+database. P13 is now covered by P09 and needs re-scoping by Samet.
 
 **Deliverables**
 
-- CP-SAT or ILP model of hard constraints and weighted soft penalties.
-- Used only as a test oracle, not the default runtime path.
+- `platform/compose/postgres.yml`:
+  - postgres only, image tag from VERSIONS.md, ports `127.0.0.1:5432:5432`, env from `.env`;
+  - named volume `rota-pgdata`, healthcheck, no `version:` key.
+- `.env.example` with `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`. `.env` stays gitignored.
+- New Maven module `persistence`: JPA entities, a Spring Data repository, and an adapter
+  implementing the application `RosterRepository` port. Domain and application stay pure.
+- Flyway migrations V1-V4: `roster`, `assignment`, `unassigned_seat`, `roster_change`.
+- Bootstrap wires the PostgreSQL adapter only under Spring profile `postgres`. The default profile
+  stays in-memory, so the P08 E2E is unaffected.
+- Scripts:
+  - `scripts/dev-up.ps1`: start the compose stack and wait for health;
+  - `scripts/dev-down.ps1`: stop it without `-v`, never deleting volumes;
+  - `scripts/run-api-postgres.ps1`: API with profile `postgres`.
+- Testcontainers integration tests (real PostgreSQL) for the adapter and for the API under
+  profile `postgres`; a default-profile wiring test.
+- ArchUnit: domain and application must not depend on Spring, Timefold or JPA.
+- `scripts/verify_p09.ps1`: compose checks + `docker compose config` + build + tests + ArchUnit.
+
+**Not in scope:** Docker for the API or web app, Kafka, Redis, employees/shifts tables, data
+retention, backups.
 
 **Verify**
 
 ```powershell
-pwsh -File scripts/verify.ps1 p09
+pwsh -NoProfile -File scripts/verify.ps1 p09
 ```
 
-Expected: matches brute-force optimum on a tiny fixture (<= 6 shifts).
+Expected: exit code 0 with Docker running. The first run pulls the postgres image.
 
 ---
 
@@ -400,6 +425,9 @@ Expected: exports re-parse (CSV/ICS) and match the source schedule.
 ---
 
 ## P13 — Persistence
+
+> **Note 2026-11-27:** roster persistence on PostgreSQL (the stack's database, not SQLite) is
+> delivered by P09. This phase needs re-scoping by Samet (for example employees/shifts storage).
 
 **Goal:** Save and reload state.
 

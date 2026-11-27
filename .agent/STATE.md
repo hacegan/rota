@@ -4,10 +4,54 @@ Checkpoint file. Update after every meaningful step. Latest entry first.
 
 ## Current
 
-- **Phase:** P08 - Browser E2E demo smoke
-- **Status:** DONE
+- **Phase:** P09 - PostgreSQL persistence
+- **Status:** CODE_WRITTEN_UNVERIFIED
 - **Updated:** 2026-11-27
-- **Previous phase:** P07 - DONE (local verify green, 2026-11-27)
+- **Previous phase:** P08 - DONE (local verify green, 2026-11-27)
+
+## P09 code (company Claude sandbox, 2026-11-27)
+
+Status **CODE_WRITTEN_UNVERIFIED**. Written by the company Claude sandbox (write files only).
+Nothing was built, tested or run, and no git or docker command was run. Verify has **not** been
+run; there is no verify output to record.
+
+Scope:
+- `platform/compose/postgres.yml`:
+  - postgres:19.0 (VERSIONS.md), `127.0.0.1:5432:5432`, env from `.env`;
+  - volume `rota-pgdata`, healthcheck, no `version:` key.
+- `.env.example` (POSTGRES_DB/USER/PASSWORD); `.env` stays gitignored.
+- New Maven module `persistence`:
+  - JPA entities;
+  - Spring Data `RosterJpaRepository`;
+  - `PostgresRosterRepository`, which implements the application `RosterRepository`;
+  - Flyway V1-V4 (`roster`, `assignment`, `unassigned_seat`, `roster_change`);
+  - `PersistenceConfiguration`, under profile `postgres` only, wired by hand without Boot
+    persistence auto-configuration.
+- Bootstrap imports it. The in-memory repository is now `@Profile("!postgres")`, so the default
+  profile and P08 E2E are unchanged.
+- Scripts: `dev-up.ps1` and `dev-down.ps1` (no `-v`, volumes never deleted), and
+  `run-api-postgres.ps1`.
+- Tests:
+  - Testcontainers: `PostgresRosterRepositoryTest` (persistence) and `PostgresProfileApiTest`
+    (bootstrap, API under profile `postgres`);
+  - `DefaultProfileWiringTest`;
+  - ArchUnit JPA rules for domain and application, plus `PersistenceArchitectureTest`.
+- `scripts/verify_p09.ps1` registered as `p09`.
+
+ROADMAP P09 changed from "Optimization (CP-SAT/ILP)" to this scope, and P13 is marked as covered;
+the reason is recorded there.
+
+Unverified points (Boot-managed versions, no Boot auto-config, Flyway 13 with PG 19, image data
+path, Testcontainers 2.0 core API, Hibernate mapping, Docker): `.agent/QUESTIONS.md` P09 §P.
+Decisions: §Q. Details, risks and the file list: `.agent/HANDOFF.md`.
+
+Verify commands for local Windows (Docker Desktop running):
+
+```powershell
+pwsh -NoProfile -File scripts/verify.ps1 p06
+pwsh -NoProfile -File scripts/verify.ps1 p08
+pwsh -NoProfile -File scripts/verify.ps1 p09
+```
 
 ## P08 code (company Claude sandbox, 2026-11-27)
 
@@ -1245,7 +1289,8 @@ P07 verify passed.
 - P05 files: see `.agent/HANDOFF.md` history (P05 commit)
 - P06 files: see `.agent/HANDOFF.md` history (P06 commit)
 - P07 files: see `.agent/HANDOFF.md` history (P07 commit)
-- P08 files: see `.agent/HANDOFF.md`
+- P08 files: see `.agent/HANDOFF.md` history (P08 commit)
+- P09 files: see `.agent/HANDOFF.md`
 
 ## Next action
 
@@ -1253,3 +1298,24 @@ P07 verify passed.
   implemented and tested; mechanical fix applied (java path in playwright.config.ts).
 - **P09 (this task):** Resolved PostgreSQL 19.0 and Flyway 13.13.0 versions. Committed
   lockfiles, updated .gitignore, switched npm install to npm ci in verify scripts.
+- **P09 CODE_WRITTEN_UNVERIFIED.** Next: local verify on Windows with Docker Desktop running, then
+  record the real output here. Run in order, each must exit 0. The first p09 run pulls the
+  postgres image for Testcontainers. Stop any running API (8080) or web app (3000) before p08.
+
+  ```powershell
+  git pull --rebase origin main
+  pwsh -NoProfile -File scripts/verify.ps1 p01
+  pwsh -NoProfile -File scripts/verify.ps1 p02
+  pwsh -NoProfile -File scripts/verify.ps1 p03
+  pwsh -NoProfile -File scripts/verify.ps1 p04
+  pwsh -NoProfile -File scripts/verify.ps1 p05
+  pwsh -NoProfile -File scripts/verify.ps1 p06
+  pwsh -NoProfile -File scripts/verify.ps1 p07
+  pwsh -NoProfile -File scripts/verify.ps1 p08
+  pwsh -NoProfile -File scripts/verify.ps1 p09
+  ```
+
+  Optional manual check (record it here): copy `.env.example` to `.env` and set a password;
+  `pwsh -NoProfile -File scripts/dev-up.ps1`; `pwsh -NoProfile -File scripts/run-api-postgres.ps1`;
+  solve mini, restart the API, `GET /api/rosters/<id from the solve>` still returns it;
+  `pwsh -NoProfile -File scripts/dev-down.ps1`. Only the local machine marks P09 DONE.

@@ -27,6 +27,12 @@
       <artifactId>rota-solver</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <!-- PostgreSQL adapter (P09); its configuration is active only under Spring profile "postgres". -->
+    <dependency>
+      <groupId>dev.rota</groupId>
+      <artifactId>rota-persistence</artifactId>
+      <version>${project.version}</version>
+    </dependency>
     <!-- Spring MVC + embedded server + JSON. Boot 4 starter name; version from the Boot parent.
          UNVERIFIED (QUESTIONS.md P06 J2): fallback is spring-boot-starter-web. -->
     <dependency>
@@ -37,6 +43,13 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <!-- PostgresProfileApiTest: real PostgreSQL in Docker. Version from VERSIONS.md. -->
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>testcontainers</artifactId>
+      <version>2.0.5</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

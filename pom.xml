@@ -28,6 +28,7 @@
     <module>domain</module>
     <module>solver</module>
     <module>application</module>
+    <module>persistence</module>
     <module>bootstrap</module>
   </modules>
 </project>

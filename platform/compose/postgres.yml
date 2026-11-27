@@ -1,0 +1,31 @@
+# Local PostgreSQL for Rota (P09). Compose v2 file: no "version:" key.
+# Start/stop only through scripts/dev-up.ps1 and scripts/dev-down.ps1, which pass the repo-root
+# .env with --env-file (copy .env.example to .env first; never commit .env).
+# dev-down.ps1 never removes the named volume: data survives restarts.
+name: rota
+
+services:
+  postgres:
+    # Tag from VERSIONS.md ("postgres (Docker image)"). Keep in step with the Testcontainers tests.
+    image: postgres:19.0
+    container_name: rota-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?set POSTGRES_DB in .env}
+      POSTGRES_USER: ${POSTGRES_USER:?set POSTGRES_USER in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      # postgres 18+ images keep data under a versioned folder below /var/lib/postgresql
+      # (QUESTIONS.md P09 P4), so the volume is mounted at the parent.
+      - rota-pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 5s
+      timeout: 5s
+      retries: 24
+      start_period: 10s
+
+volumes:
+  rota-pgdata:
+    name: rota-pgdata

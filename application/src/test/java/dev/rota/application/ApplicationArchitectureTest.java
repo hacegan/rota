@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 
 /**
- * Use cases and ports stay pure Java: no Spring, no Timefold. The domain module has the same two
+ * Use cases and ports stay pure Java: no Spring, no Timefold, no JPA. The domain module has the same
  * rules in its own ArchitectureTest.
  */
 class ApplicationArchitectureTest {
@@ -31,9 +31,16 @@ class ApplicationArchitectureTest {
     }
 
     @Test
-    void applicationMustNotDependOnSolverOrBootstrap() {
+    void applicationMustNotDependOnJpa() {
         ArchRule rule = noClasses().should().dependOnClassesThat()
-                .resideInAnyPackage("dev.rota.solver..", "dev.rota.bootstrap..");
+                .resideInAnyPackage("jakarta.persistence..", "org.hibernate..", "org.flywaydb..");
+        rule.check(APPLICATION);
+    }
+
+    @Test
+    void applicationMustNotDependOnSolverPersistenceOrBootstrap() {
+        ArchRule rule = noClasses().should().dependOnClassesThat()
+                .resideInAnyPackage("dev.rota.solver..", "dev.rota.persistence..", "dev.rota.bootstrap..");
         rule.check(APPLICATION);
     }
 }
