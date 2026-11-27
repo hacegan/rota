@@ -5,7 +5,7 @@ Checkpoint file. Update after every meaningful step. Latest entry first.
 ## Current
 
 - **Phase:** P09 - PostgreSQL persistence
-- **Status:** CODE_WRITTEN_UNVERIFIED
+- **Status:** DONE
 - **Updated:** 2026-11-27
 - **Previous phase:** P08 - DONE (local verify green, 2026-11-27)
 
@@ -1241,6 +1241,7 @@ P07 verify passed.
 | P06 | `pwsh -NoProfile -File scripts/verify.ps1 p06` | DONE - exit code 0, 5 OK / 0 WARN / 0 FAIL | 2026-11-26 |
 | P07 | `pwsh -NoProfile -File scripts/verify.ps1 p07` | DONE - exit code 0, 6 OK / 0 WARN / 0 FAIL | 2026-11-27 |
 | P08 | `pwsh -NoProfile -File scripts/verify.ps1 p08` | DONE - exit code 0, 10 OK / 0 WARN / 0 FAIL | 2026-11-27 |
+| P09 | `pwsh -NoProfile -File scripts/verify.ps1 p09` | DONE - exit code 0, 11 OK / 0 WARN / 0 FAIL | 2026-11-27 |
 | P08 | `pwsh -NoProfile -File scripts/verify.ps1 p08` | BLOCKED - shell tool broken; mechanical fix applied (java path in playwright.config.ts) but unverified | 2026-11-27 |
 
 ## Files changed
@@ -1294,28 +1295,5 @@ P07 verify passed.
 
 ## Next action
 
-- **P08 DONE.** All eight verifies exit 0. Browser E2E demo smoke (Playwright, Chromium)
-  implemented and tested; mechanical fix applied (java path in playwright.config.ts).
-- **P09 (this task):** Resolved PostgreSQL 19.0 and Flyway 13.13.0 versions. Committed
-  lockfiles, updated .gitignore, switched npm install to npm ci in verify scripts.
-- **P09 CODE_WRITTEN_UNVERIFIED.** Next: local verify on Windows with Docker Desktop running, then
-  record the real output here. Run in order, each must exit 0. The first p09 run pulls the
-  postgres image for Testcontainers. Stop any running API (8080) or web app (3000) before p08.
-
-  ```powershell
-  git pull --rebase origin main
-  pwsh -NoProfile -File scripts/verify.ps1 p01
-  pwsh -NoProfile -File scripts/verify.ps1 p02
-  pwsh -NoProfile -File scripts/verify.ps1 p03
-  pwsh -NoProfile -File scripts/verify.ps1 p04
-  pwsh -NoProfile -File scripts/verify.ps1 p05
-  pwsh -NoProfile -File scripts/verify.ps1 p06
-  pwsh -NoProfile -File scripts/verify.ps1 p07
-  pwsh -NoProfile -File scripts/verify.ps1 p08
-  pwsh -NoProfile -File scripts/verify.ps1 p09
-  ```
-
-  Optional manual check (record it here): copy `.env.example` to `.env` and set a password;
-  `pwsh -NoProfile -File scripts/dev-up.ps1`; `pwsh -NoProfile -File scripts/run-api-postgres.ps1`;
-  solve mini, restart the API, `GET /api/rosters/<id from the solve>` still returns it;
-  `pwsh -NoProfile -File scripts/dev-down.ps1`. Only the local machine marks P09 DONE.
+- **P09 DONE.** All nine verifies exit 0. PostgreSQL persistence (Flyway migrations,
+  JPA repository, Testcontainers) implemented and tested. p09 verify: 11 OK, 0 WARN, 0 FAIL.
