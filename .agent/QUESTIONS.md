@@ -217,3 +217,58 @@ No new Timefold API. The bootstrap adapter only calls the solver module's own pu
   Errors use a simple `{error, message}` body, not problem+json; problem+json stays in P14.
 - **K8 `feasible` = hard score 0.** Empty seats (medium < 0) do not make a roster infeasible.
   Tight is "feasible" with 3 unassigned seats, which are listed with reasons.
+
+## P07 — Calendar demo UI (2026-11-27)
+
+### L. Frontend toolchain: UNVERIFIED (no sandbox install or build; confirm on the local run)
+
+- **L1 TypeScript 7.0.2 with Next.js 16.4.6.** TypeScript 7 is the native (Go) compiler. Two risks:
+  - Whether its `tsc` accepts this `tsconfig.json` unchanged. Only long-standing options are used:
+    `target ES2022`, `module esnext`, `moduleResolution bundler`, `strict`, `jsx preserve`, the
+    `next` plugin. No `baseUrl`/`paths`, `esModuleInterop` or `downlevelIteration`.
+  - Whether Next's own build-time type check can drive TypeScript 7. Isolation:
+    `next.config.mjs` sets `typescript.ignoreBuildErrors: true`, and type checking runs as its own
+    verify step (`npm run typecheck`) before `next build`. Next still needs the `typescript`
+    package installed and may rewrite `tsconfig.json` on first build (`jsx`, `include`); such a
+    rewrite is expected, not an error.
+
+  Fallback if `tsc` 7 or `next build` refuses: Samet records a TypeScript 5.x/6.x GA version in
+  VERSIONS.md and local changes the one pin in `web/package.json`. That is a mechanical change.
+- **L2 `next typegen`.** The typecheck script runs `next typegen && tsc --noEmit`. `next typegen`
+  writes `next-env.d.ts` (and the route types) without a full build, so `tsc` knows the CSS-import
+  and Next types on a clean checkout. `next-env.d.ts` is gitignored because Next regenerates it.
+  If `next typegen` does not exist in 16.4.6, the mechanical fix is to swap the order in
+  `verify_p07.ps1` (build first, which also writes `next-env.d.ts`, then `tsc --noEmit`).
+- **L3 `@types/react-dom` is not in the allowed list.** The app never imports `react-dom`
+  directly (App Router renders it), so no types for it are needed. If Next's setup check insists
+  on `@types/react-dom`, that is a new dependency: ask Samet, don't add it silently.
+- **L4 package-lock.json.** It is not written by the sandbox. The first `npm install` on local
+  creates `web/package-lock.json`; commit it from company Windows.
+
+### M. P07 assumptions and decisions
+
+- **M1 ROADMAP P07 was "Scoring".** It was replaced because the Timefold score (P03/P04) is that
+  scoring function and the API already returns it. P08 "Search (beats greedy)" still describes a
+  hand-written engine (K1); not changed here.
+- **M2 CORS added to the backend** (`WebCorsConfiguration`, `rota.cors.allowed-origins`, default
+  `http://localhost:3000`, GET/POST on `/api/**`, `Location` exposed). Without it the browser blocks
+  every call from the Next dev server (port 3000) to the API (port 8080). The alternative was a
+  Next rewrite proxy. It was not chosen because the task asks for a browser-side
+  `NEXT_PUBLIC_API_BASE`. Covered by `CorsTest` (allowed origin passes, other origin 403).
+- **M3 Columns come from the API only.** The API returns employee ids, not names, and no employee
+  list. Columns are every employee with a seat plus every employee who lost a seat in a repair.
+  An employee with no seat at all does not appear. A names/employees endpoint would be an API
+  change (P14).
+- **M4 Days use the local date of the seat's start, in the roster's zone.** The API already formats
+  times in that zone, so the UI reads the date and time from the string prefix. There is no
+  browser-timezone conversion. A seat ending after midnight shows "+1".
+- **M5 Diff marking.** Changes come from the API's `changes` list.
+  - In the new employee's cell, a seat with a change is "changed" (highlighted, note "was E2").
+  - In the old employee's cell, the same seat is shown "removed" (struck through, note "now E3").
+  - A whole cell is highlighted when it holds either.
+  - LEFT_EMPTY seats appear in the Unassigned column and the change list.
+  - Pinned seats show "pinned".
+- **M6 No JS unit tests.** Only the six packages are allowed, so there is no test runner. The pure
+  functions in `web/lib` are ready for one; adding it is a dependency decision for Samet.
+- **M7 One request at a time.** Buttons are disabled while a solve runs (3-30 s, K5); a new click
+  after it ends aborts nothing. Unmounting aborts the in-flight request.

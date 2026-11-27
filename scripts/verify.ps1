@@ -26,6 +26,7 @@ $verifiers = @{
     p04 = 'scripts/verify_p04.ps1'
     p05 = 'scripts/verify_p05.ps1'
     p06 = 'scripts/verify_p06.ps1'
+    p07 = 'scripts/verify_p07.ps1'
 }
 
 $key = $Phase.ToLowerInvariant()

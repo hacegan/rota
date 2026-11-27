@@ -11,6 +11,9 @@ info:
     Fixtures are read from the repository's `fixtures/` folder. Only the names listed per
     endpoint are accepted.
 
+    Browser access (P07 web demo): CORS on `/api/**` for GET/POST from the origins in
+    `rota.cors.allowed-origins` (default `http://localhost:3000`); `Location` is exposed.
+
     Times are ISO-8601 offset date-times in the roster's zone (for example
     `2026-11-23T07:00+03:00`). Seat ids have the form `<shiftId>#<seatIndex>`, for example `S01#0`.
 servers:

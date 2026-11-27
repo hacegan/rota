@@ -22,7 +22,7 @@ verify command, and is checkpointed in `.agent/STATE.md`.
 | P04 | Soft constraints & fairness | S1 preferences, S2n/S2w night/weekend fairness, S3 stability, S4 contract hours | `pwsh -NoProfile -File scripts/verify.ps1 p04` exits 0 |
 | P05 | Sick-call repair | Repair a published roster after a sick call with minimum changes | `pwsh -NoProfile -File scripts/verify.ps1 p05` exits 0 |
 | P06 | REST API v1 | Runnable Spring Boot API around the solver: solve, repair, get roster | `pwsh -NoProfile -File scripts/verify.ps1 p06` exits 0 |
-| P07 | Scoring | Penalty/cost function | Score improves on known cases |
+| P07 | Calendar demo UI | Next.js week grid over the P06 API: solve, sick repair diff, score, unassigned | `pwsh -NoProfile -File scripts/verify.ps1 p07` exits 0 |
 | P08 | Search | Local search / simulated annealing | Beats greedy baseline on mini fixture |
 | P09 | Optimization (optional) | CP-SAT / ILP exact solve | Matches brute force on small fixture |
 | P10 | Validation | Invariant checks and reports | Validator catches seeded errors |
@@ -237,22 +237,48 @@ Expected: exit code 0; all P03-P06 tests pass; ArchUnit rules hold.
 
 ---
 
-## P07 — Scoring
+## P07 — Calendar demo UI
 
-**Goal:** One number that says how good a schedule is.
+**Goal:** See the solver's work in a browser: a week roster, a sick-call repair diff, the score
+and every empty seat with its reasons, all from the real P06 API.
+
+**Scope changed 2026-11-27 (Samet).** The original P07 was "Scoring: a penalty function combining
+soft-constraint weights, deterministic and pure". That already exists: the Timefold
+`HardMediumSoftScore` with H1-H5, M6 and S1-S4 (P03/P04) is the score, and the API returns it
+(P06). A second hand-written scoring function would duplicate the binding engine (STACK.md). P07
+instead adds the frontend demo (Next.js is the stack's frontend). P15 keeps the full schedule board
+(manual edits with revalidation, violation highlights).
 
 **Deliverables**
 
-- Penalty function combining soft-constraint weights (fairness, preferences, cost).
-- Deterministic and pure.
+- `web/`: Next.js App Router + React + TypeScript. Dependencies are exactly `next`, `react`,
+  `react-dom`, `typescript`, `@types/react` and `@types/node`, at the versions in VERSIONS.md. No
+  UI library and no state library; plain CSS.
+- Week grid: days as rows, employees as columns, shift cells; empty seats in their own column.
+- Buttons "Solve mini", "Solve tight" and "Sick repair" call
+  `POST /api/rosters/solve?fixture=…` and `POST /api/rosters/repair?fixture=sick`.
+- Sick repair diff: changed cells highlighted (new seat marked "was …", lost seat struck through
+  "now …"), plus the change list.
+- Panel: score summary (hard / medium / soft, feasible) and unassigned seats with reasons.
+- API base URL from `NEXT_PUBLIC_API_BASE`, default `http://localhost:8080`. Loading and error
+  states; no fake data.
+- Diff and format logic as pure functions in `web/lib` (`grid.ts`, `format.ts`, `api.ts` helpers).
+- Backend: CORS for `/api/**` from `rota.cors.allowed-origins` (default `http://localhost:3000`) so
+  the browser may call the API; MockMvc `CorsTest`.
+- `scripts/verify_p07.ps1`: layout, exact version pins against VERSIONS.md, `npm install`,
+  typecheck (`next typegen && tsc --noEmit`), `next build`.
+
+**Not in scope:** manual edits, auth, persistence, a JS test runner (no extra dependencies allowed;
+the `web/lib` functions are pure so a runner can be added later), Docker.
 
 **Verify**
 
 ```powershell
-pwsh -File scripts/test.ps1
+pwsh -NoProfile -File scripts/verify.ps1 p07
 ```
 
-Expected: known-better schedule scores strictly lower than known-worse on every case.
+Expected: exit code 0. The first run downloads npm packages. The P06 verify also stays green with
+the CORS test.
 
 ---
 

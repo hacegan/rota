@@ -4,10 +4,45 @@ Checkpoint file. Update after every meaningful step. Latest entry first.
 
 ## Current
 
-- **Phase:** P06 - REST API v1
-- **Status:** DONE
-- **Updated:** 2026-11-26
-- **Previous phase:** P05 - DONE (local verify green, 2026-11-25)
+- **Phase:** P07 - Calendar demo UI
+- **Status:** CODE_WRITTEN_UNVERIFIED
+- **Updated:** 2026-11-27
+- **Previous phase:** P06 - DONE (local verify green, 2026-11-26)
+
+## P07 code (company Claude sandbox, 2026-11-27)
+
+Status **CODE_WRITTEN_UNVERIFIED**. Written by the company Claude sandbox (write files only).
+Nothing was installed, compiled, type-checked, built or run, and no git or npm command was run.
+Verify has **not** been run; there is no verify output to record.
+
+Scope: new `web/` app (Next.js App Router + React + TypeScript). Only next, react, react-dom,
+typescript, @types/react and @types/node, at the VERSIONS.md pins. Plain CSS.
+- Week grid: days as rows, employees as columns, shift cells, plus an Unassigned column.
+- Buttons "Solve mini", "Solve tight" and "Sick repair" call the real P06 API.
+- Repair diff: changed cells highlighted (new seat "was …", lost seat struck through "now …"),
+  plus a change list.
+- Panel: score (hard/medium/soft, feasible) and unassigned seats with reasons.
+- API base from `NEXT_PUBLIC_API_BASE` (default `http://localhost:8080`). Loading and error
+  states; no fake data.
+- Pure logic in `web/lib` (`grid.ts`, `format.ts`, `api.ts`).
+
+Backend: CORS for `/api/**` (`WebCorsConfiguration`, `rota.cors.allowed-origins`, default
+`http://localhost:3000`), with `CorsTest`. Without it the browser cannot call the API.
+
+`scripts/verify_p07.ps1` is registered as `p07`. It runs layout, version pins, `npm install`,
+typecheck and `next build`; the first run downloads packages.
+
+ROADMAP P07 changed from "Scoring" to this scope; the reason is recorded there.
+
+Unverified toolchain points (TypeScript 7 with Next 16, `next typegen`): `.agent/QUESTIONS.md` P07
+§L. Decisions: §M. Details, risks and the file list: `.agent/HANDOFF.md`.
+
+Verify commands for local Windows:
+
+```powershell
+pwsh -NoProfile -File scripts/verify.ps1 p06
+pwsh -NoProfile -File scripts/verify.ps1 p07
+```
 
 ## P06 code (company Claude sandbox, 2026-11-25)
 
@@ -1102,10 +1137,28 @@ P05 verify passed.
 - P03 files: see `.agent/HANDOFF.md` history (P03 commit)
 - P04 files: see `.agent/HANDOFF.md` history (P04 commit)
 - P05 files: see `.agent/HANDOFF.md` history (P05 commit)
-- P06 files: see `.agent/HANDOFF.md`
+- P06 files: see `.agent/HANDOFF.md` history (P06 commit)
+- P07 files: see `.agent/HANDOFF.md`
 
 ## Next action
 
 - **P06 DONE.** All six verifies exit 0. REST API v1 (MockMvc) implemented and tested;
   mechanical verify-script regex fix (ai.timefold instead of timefold) applied to
   verify_p03.ps1 and verify_p06.ps1 so the application/domain pom description text
+- **P07 CODE_WRITTEN_UNVERIFIED.** Next: local verify on Windows, then record the real output here.
+  Run in order, each must exit 0. The first p07 run downloads npm packages and needs network.
+
+  ```powershell
+  git pull --rebase origin main
+  pwsh -NoProfile -File scripts/verify.ps1 p01
+  pwsh -NoProfile -File scripts/verify.ps1 p02
+  pwsh -NoProfile -File scripts/verify.ps1 p03
+  pwsh -NoProfile -File scripts/verify.ps1 p04
+  pwsh -NoProfile -File scripts/verify.ps1 p05
+  pwsh -NoProfile -File scripts/verify.ps1 p06
+  pwsh -NoProfile -File scripts/verify.ps1 p07
+  ```
+
+  Manual walkthrough (record it here): `pwsh -NoProfile -File scripts/run-api.ps1`; in a second
+  shell `cd web; npm run dev`; open http://localhost:3000. Click "Solve mini", "Solve tight" and
+  "Sick repair"; S06#0 should move from E2 to E3, highlighted. Only the local machine marks P07 DONE.
