@@ -23,7 +23,7 @@ verify command, and is checkpointed in `.agent/STATE.md`.
 | P05 | Sick-call repair | Repair a published roster after a sick call with minimum changes | `pwsh -NoProfile -File scripts/verify.ps1 p05` exits 0 |
 | P06 | REST API v1 | Runnable Spring Boot API around the solver: solve, repair, get roster | `pwsh -NoProfile -File scripts/verify.ps1 p06` exits 0 |
 | P07 | Calendar demo UI | Next.js week grid over the P06 API: solve, sick repair diff, score, unassigned | `pwsh -NoProfile -File scripts/verify.ps1 p07` exits 0 |
-| P08 | Search | Local search / simulated annealing | Beats greedy baseline on mini fixture |
+| P08 | Browser E2E demo smoke | Playwright drives the demo UI against the real API; screenshot | `pwsh -NoProfile -File scripts/verify.ps1 p08` exits 0 |
 | P09 | Optimization (optional) | CP-SAT / ILP exact solve | Matches brute force on small fixture |
 | P10 | Validation | Invariant checks and reports | Validator catches seeded errors |
 | P11 | CLI | `validate`, `solve`, `export` commands | End-to-end run on fixture |
@@ -282,23 +282,44 @@ the CORS test.
 
 ---
 
-## P08 — Search
+## P08 — Browser E2E demo smoke
 
-**Goal:** Improve on greedy.
+**Goal:** Prove the whole demo works end to end in a real browser (UI → API → solver) and keep a
+screenshot of the sick-call repair.
+
+**Scope changed 2026-11-27 (Samet).** The original P08 was "Search: local search / simulated
+annealing with a seedable RNG; beats the greedy baseline on mini". Timefold (P03-P05) already is
+the search engine: construction heuristic plus local search, configured in `RosterSolver`. There
+is no greedy baseline any more: P06 replaced the greedy scheduler. A hand-written search would
+duplicate the binding engine (STACK.md). P08 instead locks in the demo with browser tests.
 
 **Deliverables**
 
-- Local search over assignments (swap / move / replace) with simulated annealing or hill
-  climbing; budgeted iterations.
-- Seedable RNG for reproducibility.
+- API CORS for the web origin `http://localhost:3000`, configurable via `rota.web.origin`
+  (renames P07's `rota.cors.allowed-origins`). `CorsTest` covers the default origin and
+  `WebOriginPropertyTest` covers the property.
+- `e2e/`: Playwright with `@playwright/test` at the VERSIONS.md version only, Chromium only.
+  `playwright.config.ts` starts the API (`scripts/run-api.ps1 -SkipBuild`) and the web app
+  (`next build` + `next start`) automatically.
+- Tests:
+  1. Solve mini: the grid renders, 14 assigned cells, score feasible.
+  2. Solve tight: the unassigned panel shows 3 seats with reasons.
+  3. Sick repair: changed cells highlighted (2 cells: E2 lost and E3 gained S06#0) and the
+     change list visible.
+- Screenshot `docs/demo/rota-demo.png` after the sick repair.
+- `scripts/verify_p08.ps1`: build API, `npm install` (web, e2e),
+  `npx playwright install chromium`, run E2E, check the screenshot was written.
+
+**Not in scope:** DB, Docker, Kafka, other browsers, visual diffing, CI pipeline.
 
 **Verify**
 
 ```powershell
-pwsh -File scripts/verify.ps1 p08
+pwsh -NoProfile -File scripts/verify.ps1 p08
 ```
 
-Expected: final score <= greedy score on the mini fixture; hard violations stay at zero.
+Expected: exit code 0. The first run downloads npm packages and Chromium. Ports 8080 and 3000
+must be free.
 
 ---
 

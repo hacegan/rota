@@ -272,3 +272,53 @@ No new Timefold API. The bootstrap adapter only calls the solver module's own pu
   functions in `web/lib` are ready for one; adding it is a dependency decision for Samet.
 - **M7 One request at a time.** Buttons are disabled while a solve runs (3-30 s, K5); a new click
   after it ends aborts nothing. Unmounting aborts the in-flight request.
+
+## P08 — Browser E2E demo smoke (2026-11-27)
+
+### N. Playwright toolchain: UNVERIFIED (no sandbox install or run; confirm on the local run)
+
+- **N1 `@playwright/test` 1.65.1 config API.** The config uses long-standing options:
+  `defineConfig`, `devices["Desktop Chrome"]`, `webServer` as an array with `command`, `cwd`, `url`,
+  `timeout`, `reuseExistingServer`, `env`, `stdout`, `stderr`, and `expect.timeout`.
+  - Playwright transpiles `playwright.config.ts` and the spec itself; no `typescript` package is
+    needed in `e2e/`.
+  - `__dirname` assumes the CommonJS loading Playwright uses when `package.json` has no
+    `"type": "module"`.
+- **N2 webServer commands on Windows.** Playwright runs each command through the shell:
+  - API: `pwsh -NoProfile -File scripts/run-api.ps1 -SkipBuild -Port 8080` (cwd: repo root);
+  - Web: `npm run build && npm run start -- --port 3000` (cwd `web/`).
+
+  Playwright stops both when the run ends. Assumption: on Windows it kills the whole process tree,
+  including the `java` child of `pwsh`. If a `java` process is left on port 8080, the next run's
+  port check fails clearly. Stop it by hand (that is not a repo change).
+- **N3 Chromium download.** `npx playwright install chromium` downloads into the user's
+  Playwright cache (`%LOCALAPPDATA%\ms-playwright`), outside the repo. A proxy or offline machine
+  makes this step fail. That is an environment problem, not a code one.
+
+### O. P08 assumptions and decisions
+
+- **O1 ROADMAP P08 was "Search (beats greedy)".** It was replaced because Timefold is the search
+  engine and P06 removed the greedy baseline (K1, M1).
+- **O2 Separate `e2e/` package.** It is separate rather than a devDependency in `web/`, so:
+  - the P07-verified `web/package.json` (exactly six packages, checked by `verify_p07.ps1`) stays
+    unchanged;
+  - the browser tooling stays out of the app.
+- **O3 Property rename `rota.cors.allowed-origins` → `rota.web.origin`.** This follows the P08
+  instruction. Same default (`http://localhost:3000`), same behaviour, and a comma-separated list
+  is still accepted. Anyone who set the old property in a local override must rename it; the
+  repo has no other use of it.
+- **O4 Tests use the page's existing classes and ARIA labels**: `table.week`, `.entry-assigned`,
+  `.entry-empty`, `.entry-changed`, `.entry-removed`, `td.cell.changed`, the regions "Score",
+  "Unassigned seats" and "Changes", and the button names. No `data-testid` was added, so the web
+  app is unchanged apart from one error-hint string.
+- **O5 Expected numbers come from the solver/API tests:**
+  - mini: 14 seats, all assigned (P03);
+  - tight: 3 unassigned (P03);
+  - sick: exactly one change, S06#0 E2 → E3 (P05/P06), which gives 2 highlighted cells.
+
+  If the solver ever finds a different equally good repair, test 3 fails. That is a solver
+  question for Opus, not a test to loosen.
+- **O6 `CI=1` in `verify_p08.ps1`.** Playwright then always starts fresh servers and never reuses
+  a stale API or web app. Running `npx playwright test` by hand reuses running ones.
+- **O7 Screenshot `docs/demo/rota-demo.png`** is full-page at 1440×900 after the sick repair. It
+  is not gitignored: commit it from company Windows after a green run.

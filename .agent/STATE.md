@@ -4,10 +4,45 @@ Checkpoint file. Update after every meaningful step. Latest entry first.
 
 ## Current
 
-- **Phase:** P07 - Calendar demo UI
-- **Status:** DONE
+- **Phase:** P08 - Browser E2E demo smoke
+- **Status:** CODE_WRITTEN_UNVERIFIED
 - **Updated:** 2026-11-27
-- **Previous phase:** P06 - DONE (local verify green, 2026-11-26)
+- **Previous phase:** P07 - DONE (local verify green, 2026-11-27)
+
+## P08 code (company Claude sandbox, 2026-11-27)
+
+Status **CODE_WRITTEN_UNVERIFIED**. Written by the company Claude sandbox (write files only).
+Nothing was installed, built or run, and no git, npm or Playwright command was run. Verify has
+**not** been run; there is no verify output or screenshot to record.
+
+Scope:
+- API CORS origin is now configured via `rota.web.origin` (default `http://localhost:3000`; renamed
+  from `rota.cors.allowed-origins`), with the new `WebOriginPropertyTest`.
+- New `e2e/` package: only `@playwright/test` 1.65.1 (VERSIONS.md), Chromium.
+- `playwright.config.ts` starts the API (`run-api.ps1 -SkipBuild`) and the web app
+  (`next build` + `next start`).
+- Three tests:
+  - mini: 14 assigned cells, feasible;
+  - tight: 3 unassigned seats with reasons;
+  - sick repair: 2 highlighted cells and the change list "S06#0: E2 → E3".
+- A screenshot is written to `docs/demo/rota-demo.png`.
+
+`scripts/verify_p08.ps1` is registered as `p08`. It checks layout, version pin, tools and free
+ports, then runs build API, `npm install` (web, e2e), `npx playwright install chromium`, the E2E
+tests and a screenshot check. The first run downloads packages and Chromium.
+
+ROADMAP P08 changed from "Search (beats greedy)" to this scope; the reason is recorded there.
+
+Unverified Playwright points: `.agent/QUESTIONS.md` P08 §N. Decisions: §O. Details, risks and the
+file list: `.agent/HANDOFF.md`.
+
+Verify commands for local Windows (ports 8080 and 3000 must be free):
+
+```powershell
+pwsh -NoProfile -File scripts/verify.ps1 p06
+pwsh -NoProfile -File scripts/verify.ps1 p07
+pwsh -NoProfile -File scripts/verify.ps1 p08
+```
 
 ## P07 code (company Claude sandbox, 2026-11-27)
 
@@ -1207,9 +1242,28 @@ P07 verify passed.
 - P04 files: see `.agent/HANDOFF.md` history (P04 commit)
 - P05 files: see `.agent/HANDOFF.md` history (P05 commit)
 - P06 files: see `.agent/HANDOFF.md` history (P06 commit)
-- P07 files: see `.agent/HANDOFF.md`
+- P07 files: see `.agent/HANDOFF.md` history (P07 commit)
+- P08 files: see `.agent/HANDOFF.md`
 
 ## Next action
 
 - **P07 DONE.** All seven verifies exit 0. Calendar demo UI (Next.js, TypeScript) implemented
   and tested; CORS configured for local dev (localhost:3000 -> :8080). No solver semantics changed.
+- **P08 CODE_WRITTEN_UNVERIFIED.** Next: local verify on Windows, then record the real output here.
+  Stop any running API (8080) or web app (3000) first. Run in order, each must exit 0. The first
+  p08 run downloads npm packages and Chromium and needs network.
+
+  ```powershell
+  git pull --rebase origin main
+  pwsh -NoProfile -File scripts/verify.ps1 p01
+  pwsh -NoProfile -File scripts/verify.ps1 p02
+  pwsh -NoProfile -File scripts/verify.ps1 p03
+  pwsh -NoProfile -File scripts/verify.ps1 p04
+  pwsh -NoProfile -File scripts/verify.ps1 p05
+  pwsh -NoProfile -File scripts/verify.ps1 p06
+  pwsh -NoProfile -File scripts/verify.ps1 p07
+  pwsh -NoProfile -File scripts/verify.ps1 p08
+  ```
+
+  After a green p08: check `docs/demo/rota-demo.png` (sick repair, S06#0 E2 → E3 highlighted) and
+  commit it from company Windows. Only the local machine marks P08 DONE.

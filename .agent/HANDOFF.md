@@ -1,108 +1,106 @@
-# Handoff — P07 calendar demo UI (company Claude sandbox → local Windows)
+# Handoff — P08 browser E2E demo smoke (company Claude sandbox → local Windows)
 
 Date: 2026-11-27. Status: **CODE_WRITTEN_UNVERIFIED**. Written by the company Claude sandbox.
-Nothing was installed, type-checked, built, run or committed; no git or npm command was run.
-P06 is DONE (see STATE.md).
+Nothing was installed, built, run or committed; no git, npm or Playwright command was run. P07 is
+DONE (see STATE.md).
 
 ## Scope
 
-- **`web/`:** Next.js App Router + React + TypeScript, one page (`/`).
-  - Dependencies are exactly `next` 16.4.6, `react` 19.3.1 and `react-dom` 19.3.1; devDependencies
-    `typescript` 7.0.2, `@types/react` 19.3.3 and `@types/node` 26.6.11, all from VERSIONS.md.
-  - No UI or state library; plain CSS in `app/globals.css`.
-- **Screen:**
-  - Buttons "Solve mini", "Solve tight" and "Sick repair" POST to the real API.
-  - Week grid: days as rows, employees as columns, shift cells (time, skill, seat id), plus an
-    Unassigned column.
-  - Repair diff: the cell that gained a seat is highlighted ("was E2"); the cell that lost it is
-    highlighted with the seat struck through ("now E3"); a change list sits beside it.
-  - Side panel: hard / medium / soft score, a feasible flag, and unassigned seats with every reason.
-  - Loading text while the solver runs (3-30 s); an error box with the API's `{error, message}` or
-    a "cannot reach the API" hint.
-- **API base:** `NEXT_PUBLIC_API_BASE`, default `http://localhost:8080`. It is inlined at build
-  time, so a change needs a rebuild or dev restart.
-- **Pure logic in `web/lib`:**
-  - `grid.ts`: week grid plus diff.
-  - `format.ts`: dates, times, score, change text, without timezone or locale APIs.
-  - `api.ts`: base URL, paths, error text, plus the one `fetch` call.
-  - `types.ts`: the `rota.yaml` shapes.
-- **Backend (small, needed for the browser):** `WebCorsConfiguration` allows `/api/**` GET/POST
-  from `rota.cors.allowed-origins` (default `http://localhost:3000`) and exposes `Location`.
-  `CorsTest` covers it. A one-line CORS note was added to `rota.yaml`. No endpoint, DTO or solver
-  change.
-- **`scripts/verify_p07.ps1`:**
-  - Checks layout and that `web/.gitignore` ignores node_modules and .next.
-  - Checks that `package.json` has exactly those six packages at the VERSIONS.md pins.
-  - Checks node/npm, then runs `npm install`, `npm run typecheck` (`next typegen && tsc --noEmit`)
-    and `npm run build` (`next build`).
-  - The header notes that the first run downloads packages.
-  - Registered as `p07`.
+- **API CORS:** the web origin is now set by `rota.web.origin` (default `http://localhost:3000`,
+  comma-separated list accepted). It replaces P07's `rota.cors.allowed-origins`, with the same
+  behaviour.
+  - Existing `CorsTest` covers the default origin.
+  - New `WebOriginPropertyTest` checks that a configured origin passes and the default is then
+    refused.
+  - The rota.yaml note and the web error hint use the new name.
+- **`e2e/`:** a separate npm package whose only dependency is `@playwright/test` 1.65.1
+  (VERSIONS.md). `web/package.json` is unchanged.
+  - `playwright.config.ts`: Chromium only, 1440×900, one worker, 120 s per test (solves take
+    3-30 s). It starts:
+    - the API: `pwsh -NoProfile -File scripts/run-api.ps1 -SkipBuild -Port 8080`, waits for
+      `/api/health`;
+    - the web app: `npm run build && npm run start -- --port 3000` in `web/`, with
+      `NEXT_PUBLIC_API_BASE=http://localhost:8080`.
+
+    Both stop after the run. Without `CI`, servers already running are reused.
+  - `tests/demo.spec.ts`:
+    1. Solve mini: the grid renders, 14 `.entry-assigned` cells, no empty seat, score "Feasible"
+       with hard 0.
+    2. Solve tight: the panel shows "Unassigned (3)", each seat with at least one
+       `E<n>: <reason>` line, and 3 empty seats in the grid.
+    3. Sick repair: 2 highlighted cells, `S06#0` "was E2" in E3's cell and "now E3" in E2's cell,
+       and the change list "Changes (1)" with `S06#0: E2 → E3 (reassigned)`. Then a full-page
+       screenshot to `docs/demo/rota-demo.png`.
+- **`scripts/verify_p08.ps1`:**
+  - Checks layout, the exact `@playwright/test` pin against VERSIONS.md, node/npm/npx, and that
+    ports 8080 and 3000 are free.
+  - Then runs `scripts/build.ps1` (API jar), `npm install` in `web/` and in `e2e/`,
+    `npx playwright install chromium`, and `npx playwright test` with `CI=1`.
+  - Finally checks that the screenshot was written by this run.
+  - The header notes that the first run downloads packages and Chromium. Registered as `p08`.
+- **Not in scope:** DB, Docker, Kafka, other browsers, visual diffing, CI pipeline.
 
 ## What local must run
 
 ```powershell
 git pull --rebase origin main        # after company Windows commits/pushes these files
-pwsh -NoProfile -File scripts/verify.ps1 p06   # includes the new CorsTest
-pwsh -NoProfile -File scripts/verify.ps1 p07   # first run downloads npm packages
+# stop any API on 8080 / web app on 3000 first
+pwsh -NoProfile -File scripts/verify.ps1 p06   # CorsTest + WebOriginPropertyTest
+pwsh -NoProfile -File scripts/verify.ps1 p07
+pwsh -NoProfile -File scripts/verify.ps1 p08   # first run downloads npm packages + Chromium
 ```
 
 Then:
 
 1. Record the exact outputs and exit codes in `.agent/STATE.md`.
-2. Manual walkthrough, recorded in STATE.md:
-   - Run `pwsh -NoProfile -File scripts/run-api.ps1`; in a second shell, `cd web; npm run dev`;
-     open http://localhost:3000.
-   - Solve mini: full grid with an empty Unassigned column and hard 0.
-   - Solve tight: 3 unassigned seats with reasons and medium −1080.
-   - Sick repair: S06#0 E2 → E3 highlighted in both cells, and 1 change listed.
-   - Stop the API and click a button: an error box appears.
-3. Toolchain failures: mechanical fixes only (AGENTS.md "Who changes what"). See QUESTIONS.md §L:
-   - L1: if TypeScript 7 is refused, Samet picks another GA version in VERSIONS.md first;
-   - L2: if `next typegen` is missing, swap to build then `tsc`.
-
-   Adding any package (for example `@types/react-dom`, L3) needs Samet's approval.
-4. Commit `web/package-lock.json` created by the first `npm install` (L4).
-5. Mark P07 DONE only if `verify p07` exits 0 and p06 stays green.
+2. Open `docs/demo/rota-demo.png`; it should show the sick repair with S06#0 highlighted. Commit
+   it and `e2e/package-lock.json` from company Windows.
+3. Failures:
+   - Toolchain or plumbing problems (paths, flags, a Playwright option renamed in 1.65.1,
+     webServer command quoting on Windows) are mechanical fixes for local opencode.
+   - Changing test expectations, selectors' meaning or the solver goes back to Opus
+     (QUESTIONS.md O5).
+4. Mark P08 DONE only if `verify p08` exits 0 and p06/p07 stay green.
 
 ## Expected result (predicted, not observed)
 
 | Check | Prediction |
 | --- | --- |
-| p06 | Still green; `CorsTest` (3) passes. Preflight from `http://localhost:3000` returns 200 with Allow-Origin; other origin returns 403 |
-| p07 layout, versions, tools | OK |
-| p07 install | OK after downloading packages (first run takes several minutes) |
-| p07 typecheck | OK, unless TypeScript 7 rejects a `tsconfig` option or `next typegen` is missing (QUESTIONS L1/L2) |
-| p07 build | OK; Next may rewrite `tsconfig.json` (`jsx`, `include`) on the first build. That is expected |
+| p06 | Green; `CorsTest` (3) and `WebOriginPropertyTest` (2) pass |
+| p07 | Green; `web/package.json` unchanged |
+| p08 layout, versions, tools, ports | OK (ports fail if an API or web app is still running) |
+| p08 build, web-npm, e2e-npm, browser | OK; the first run downloads Chromium (about 150-200 MB) |
+| p08 e2e | 3 passed; each test takes about 5-35 s, and the web build adds about 10-30 s at start |
+| p08 screenshot | `docs/demo/rota-demo.png` written |
 
 ## Known risks
 
-- **TypeScript 7.0.2 + Next 16.4.6 is untried** (QUESTIONS.md L1). Next's own type check is off
-  (`ignoreBuildErrors`); `tsc` runs separately.
-- **No JS unit tests** (M6): the allowed packages include no test runner. `web/lib` is pure so
-  tests can be added once a runner is approved.
-- **Employee columns come from roster data only** (M3); the API has no employee list or names.
-- **The backend gained CORS** (M2). It is a small semantic change in bootstrap, made by Opus,
-  scoped to `/api/**` and configurable.
-- **ROADMAP P08** still mentions greedy (K1/M1).
+- **Playwright 1.65.1 options and Windows process cleanup are untried** (QUESTIONS.md N1/N2). If a
+  `java` process survives on 8080, stop it by hand; the next port check reports it.
+- **Test 3 assumes the solver's repair is exactly S06#0 E2 → E3** (as the P05/P06 tests assert).
+- **Chromium download** needs network or proxy access (N3).
+- **The property rename** breaks any private override that still uses `rota.cors.allowed-origins`
+  (O3).
 
 ## Changed files
 
 Modified:
 
-- `bootstrap/src/main/resources/application.properties`: `rota.cors.allowed-origins`
-- `docs/contracts/openapi/rota.yaml`: CORS note in the description
-- `docs/plan/ROADMAP.md`: P07 row and section, with the reason for the change
-- `scripts/verify.ps1`: register `p07`
+- `bootstrap/src/main/java/dev/rota/bootstrap/WebCorsConfiguration.java`: property `rota.web.origin`
+- `bootstrap/src/main/resources/application.properties`: `rota.web.origin`
+- `web/lib/api.ts`: error hint names `rota.web.origin`
+- `docs/contracts/openapi/rota.yaml`: CORS note names `rota.web.origin`
+- `docs/plan/ROADMAP.md`: P08 row and section, with the reason for the change
+- `scripts/verify.ps1`: register `p08`
 - `.agent/STATE.md`, `.agent/HANDOFF.md`, `.agent/QUESTIONS.md`
 
 New:
 
-- `web/package.json`, `web/tsconfig.json`, `web/next.config.mjs`, `web/.gitignore`
-- `web/app/layout.tsx`, `web/app/page.tsx`, `web/app/roster-demo.tsx`, `web/app/globals.css`
-- `web/lib/types.ts`, `web/lib/format.ts`, `web/lib/grid.ts`, `web/lib/api.ts`
-- `bootstrap/src/main/java/dev/rota/bootstrap/WebCorsConfiguration.java`
-- `bootstrap/src/test/java/dev/rota/bootstrap/CorsTest.java`
-- `scripts/verify_p07.ps1`
+- `e2e/package.json`, `e2e/.gitignore`, `e2e/playwright.config.ts`, `e2e/tests/demo.spec.ts`
+- `bootstrap/src/test/java/dev/rota/bootstrap/WebOriginPropertyTest.java`
+- `scripts/verify_p08.ps1`
 
-Not changed: domain, solver, application, the other bootstrap classes, fixtures, VERSIONS.md,
-STACK.md, DECISIONS.md, REQUIREMENTS.md, AGENTS.md, `verify_p06.ps1`.
+Generated by the local run (not written here): `docs/demo/rota-demo.png`, `e2e/package-lock.json`.
+
+Not changed: domain, solver, application, the web UI components, `web/package.json`, fixtures,
+VERSIONS.md, STACK.md, AGENTS.md, `run-api.ps1`, `verify_p06.ps1`, `verify_p07.ps1`.

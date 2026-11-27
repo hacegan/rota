@@ -76,7 +76,7 @@ export async function runAction(action: DemoAction, signal?: AbortSignal): Promi
     }
     throw new ApiRequestError(
       `Cannot reach the API at ${base}. Is it running (scripts/run-api.ps1)? ` +
-        "If it is, check that it allows this page's origin (rota.cors.allowed-origins).",
+        "If it is, check that it allows this page's origin (rota.web.origin).",
     );
   }
   let body: unknown = null;
